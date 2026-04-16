@@ -8,7 +8,7 @@ Interaktive Visualisierung von Spielplatzdaten für den [Open Data App Store](ht
 
 ![Screenshot Desktop](assets/Desktop_Screenshot.png)
 
-![Screenshot Mobile](assets/Mobile_Screenshot.png)
+![Screenshot Mobile](assets/Desktop_Screenshot_2.png)
 
 Single Page Application mit Logo, Menü, Impressum/Datenschutz/Kontakt-Seiten und Fußzeile. Die Konfiguration wird vom ODAS geladen. Inhalte:
 

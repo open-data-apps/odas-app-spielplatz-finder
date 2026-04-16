@@ -19,7 +19,7 @@
   "tags-datenart": ["Standortdaten"],
   "screenshots": [
     "assets/Desktop_Screenshot.png",
-    "assets/Mobile_Screenshot.png"
+    "assets/Desktop_Screenshot_2.png"
   ],
   "daten": {
     "beschreibung": "CSV-Daten aus einem Open Data Portal werden ueber den lokalen Proxy geladen und in Karte sowie Tabelle dargestellt.",
