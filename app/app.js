@@ -444,6 +444,10 @@ function initApp(data, container) {
 
   const geocodeCache = new Map();
   const geocodeInFlight = new Set();
+  const markerByKey = new Map();
+  let latestRowsByKey = new Map();
+  let selectedRowKey = "";
+  let pendingFocusKey = "";
   let renderScheduled = false;
   let currentPage = 1;
 
@@ -496,6 +500,57 @@ function initApp(data, container) {
       sp.lat !== 0 &&
       sp.lon !== 0
     );
+  }
+
+  function getRowKey(sp) {
+    if (sp.id) return `id:${sp.id}`;
+    return (
+      "row:" +
+      [sp.name, sp.strasse, sp.plz, sp.ortsteil]
+        .map(function (v) {
+          return String(v || "")
+            .trim()
+            .toLowerCase();
+        })
+        .join("|")
+    );
+  }
+
+  function highlightSelectedRow() {
+    const tbody = document.getElementById("sp-tbody");
+    tbody.querySelectorAll("tr[data-row-key]").forEach(function (rowEl) {
+      const rowKey = decodeURIComponent(
+        rowEl.getAttribute("data-row-key") || "",
+      );
+      rowEl.classList.toggle("table-primary", rowKey === selectedRowKey);
+    });
+  }
+
+  function focusPlaygroundByKey(rowKey) {
+    const sp = latestRowsByKey.get(rowKey);
+    if (!sp) return;
+
+    selectedRowKey = rowKey;
+    const coords = getCoords(sp);
+
+    if (Array.isArray(coords) && coords.length === 2) {
+      const marker = markerByKey.get(rowKey);
+      if (marker) {
+        marker.openPopup();
+        map.setView(coords, 17, { animate: true });
+      }
+      mapStatus.textContent = `${sp.name || "Spielplatz"} auf Karte fokussiert`;
+      highlightSelectedRow();
+      return;
+    }
+
+    pendingFocusKey = rowKey;
+    if (queueGeocode(sp)) {
+      mapStatus.textContent = `${sp.name || "Spielplatz"}: Koordinaten werden per Adresse ermittelt …`;
+    } else {
+      mapStatus.textContent = `${sp.name || "Spielplatz"}: Keine Koordinaten/Adresse für Kartenfokus verfügbar.`;
+    }
+    highlightSelectedRow();
   }
 
   function geocodeKey(sp) {
@@ -576,12 +631,14 @@ function initApp(data, container) {
 
   function renderMap(rows) {
     markerLayer.clearLayers();
+    markerByKey.clear();
     const bounds = [];
     let markerCount = 0;
     let queuedGeocodes = 0;
     const maxGeocodePerRender = 8;
 
     rows.forEach(function (sp) {
+      const rowKey = getRowKey(sp);
       const coords = getCoords(sp);
       if (Array.isArray(coords) && coords.length === 2) {
         const marker = L.marker(coords);
@@ -601,6 +658,7 @@ function initApp(data, container) {
             (sp.schliesszeiten ? "<br>🕐 " + sp.schliesszeiten : ""),
         );
         markerLayer.addLayer(marker);
+        markerByKey.set(rowKey, marker);
         bounds.push(coords);
         markerCount++;
         return;
@@ -611,7 +669,24 @@ function initApp(data, container) {
       }
     });
 
-    if (bounds.length > 0) {
+    if (pendingFocusKey && markerByKey.has(pendingFocusKey)) {
+      const marker = markerByKey.get(pendingFocusKey);
+      if (marker) {
+        marker.openPopup();
+        map.setView(marker.getLatLng(), 17, { animate: true });
+      }
+      selectedRowKey = pendingFocusKey;
+      pendingFocusKey = "";
+      highlightSelectedRow();
+    }
+
+    const selectedMarker = selectedRowKey
+      ? markerByKey.get(selectedRowKey)
+      : null;
+    if (selectedMarker) {
+      selectedMarker.openPopup();
+      map.setView(selectedMarker.getLatLng(), 17, { animate: true });
+    } else if (bounds.length > 0) {
       try {
         map.fitBounds(bounds, { padding: [30, 30], maxZoom: 16 });
       } catch (e) {}
@@ -673,17 +748,25 @@ function initApp(data, container) {
 
     // Tabelle
     const tbody = document.getElementById("sp-tbody");
+    latestRowsByKey = new Map(
+      paged.map(function (sp) {
+        return [getRowKey(sp), sp];
+      }),
+    );
+
     if (paged.length === 0) {
       tbody.innerHTML = `<tr><td colspan="7" class="text-center text-muted">
         Keine Ergebnisse für diese Filter.</td></tr>`;
     } else {
       tbody.innerHTML = paged
         .map(function (sp) {
+          const rowKey = getRowKey(sp);
+          const rowKeyAttr = encodeURIComponent(rowKey);
           const addressLine = [sp.strasse, sp.plz].filter(Boolean).join(" · ");
           const tischtennisBadge =
             sp.tischtennisCount > 0 ? badge(true) : badge(sp.tischtennis);
 
-          return `<tr>
+          return `<tr data-row-key="${rowKeyAttr}" style="cursor:pointer;">
           <td>
             <div class="fw-semibold">${sp.name || "<em class='text-muted'>–</em>"}</div>
             <div class="small text-muted">${addressLine || "–"}</div>
@@ -699,6 +782,8 @@ function initApp(data, container) {
         })
         .join("");
     }
+
+    highlightSelectedRow();
 
     renderMap(paged);
   }
@@ -717,6 +802,17 @@ function initApp(data, container) {
   });
 
   pageSizeSelect.addEventListener("change", resetPageAndRender);
+  document
+    .getElementById("sp-tbody")
+    .addEventListener("click", function (event) {
+      const rowEl = event.target.closest("tr[data-row-key]");
+      if (!rowEl) return;
+      const rowKey = decodeURIComponent(
+        rowEl.getAttribute("data-row-key") || "",
+      );
+      focusPlaygroundByKey(rowKey);
+    });
+
   prevBtn.addEventListener("click", function () {
     if (currentPage > 1) {
       currentPage--;
