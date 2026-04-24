@@ -1,4 +1,4 @@
-# Spielplatz-Finder – App für den Open Data App-Store (ODAS)
+# Spielplätze – App für den Open Data App-Store (ODAS)
 
 Interaktive Visualisierung von Spielplatzdaten für den [Open Data App Store](https://open-data-app-store.de/). Entspricht der [Open Data App-Spezifikation](https://open-data-apps.github.io/open-data-app-docs/open-data-app-spezifikation/). Mehr unter https://github.com/open-data-apps
 

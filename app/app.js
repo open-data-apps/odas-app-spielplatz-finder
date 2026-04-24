@@ -18,7 +18,7 @@ function app(configdata = {}, enclosingHtmlDivElement) {
   enclosingHtmlDivElement.innerHTML = `
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h2 class="mb-0">
-        <span style="font-size:1.4rem;">🛝</span> Spielplatz-Finder
+        <span style="font-size:1.4rem;">🛝</span> Spielplätze
       </h2>
       <small class="text-muted">Steglitz-Zehlendorf · Berlin Open Data</small>
     </div>

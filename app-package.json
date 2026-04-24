@@ -1,8 +1,8 @@
 {
   "app-entwickler-id": "12343",
   "app-entwickler-name": "ondics-gmbh",
-  "name-in-url": "Spielplatz-Finder",
-  "name": "Spielplatz-Finder",
+  "name-in-url": "Spielplaetze",
+  "name": "Spielplätze",
   "version": "1.1.0",
   "odas-app-icon": "assets/odas-app-icon.svg",
   "app-icon": "assets/odas-app-icon.svg",
@@ -33,7 +33,7 @@
     "seitentitel": {
       "label": "Seitentitel",
       "hilfe": "Der Seitentitel wird im Browser-Tab der App angezeigt",
-      "default": "Spielplatz-Finder",
+      "default": "Spielplätze",
       "format": {
         "typ": "string",
         "laenge": 50
@@ -53,7 +53,7 @@
     "titel": {
       "label": "Titel",
       "hilfe": "Der Titel wird in der Titelzeile der App angezeigt",
-      "default": "Spielplatz-Finder",
+      "default": "Spielplätze",
       "format": {
         "typ": "string",
         "laenge": 50
