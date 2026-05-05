@@ -1,0 +1,87 @@
+{
+  "$schema": "https://frictionlessdata.io/schemas/table-schema.json",
+  "name": "odas-app-spielplatz-finder",
+  "title": "Spielplätze",
+  "fields": [
+    {
+      "name": "ortsteil",
+      "type": "string",
+      "description": "Wird in der App verwendet",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "art",
+      "type": "string",
+      "description": "Wird in der App verwendet",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "tischtennis_anzahl",
+      "type": "string",
+      "description": "Wird in der App verwendet",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "tischtennis",
+      "type": "string",
+      "description": "Wird in der App verwendet",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "lat",
+      "type": "string",
+      "description": "Wird in der App verwendet",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "lon",
+      "type": "string",
+      "description": "Wird in der App verwendet",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "latitude",
+      "type": "string",
+      "description": "Wird in der App verwendet",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "longitude",
+      "type": "string",
+      "description": "Wird in der App verwendet",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "spielplatz_name",
+      "type": "string",
+      "description": "Wird in der App verwendet",
+      "constraints": {
+        "required": true
+      }
+    },
+    {
+      "name": "adresse",
+      "type": "string",
+      "description": "Wird in der App verwendet",
+      "constraints": {
+        "required": true
+      }
+    }
+  ]
+}
