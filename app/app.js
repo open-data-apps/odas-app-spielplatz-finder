@@ -4,6 +4,30 @@
  * - @returns {null}
  */
 
+let spDatenStand = null;
+
+function escapeHtml(str) {
+  if (str === null || str === undefined) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function renderWeitereInfos(configdata) {
+  const links = String(configdata.weiterfuehrendeLinks || "").trim();
+  if (!links) return "";
+  return (
+    '<section class="sp-weitere-infos mt-4">' +
+    '<h2 class="h5 mb-3">Weitere Informationen</h2>' +
+    '<div class="sp-weitere-infos-content">' +
+    links +
+    "</div></section>"
+  );
+}
+
 function extractPathFromUrl(url) {
   try {
     const u = new URL(url);
@@ -18,10 +42,11 @@ function app(configdata = {}, enclosingHtmlDivElement) {
   enclosingHtmlDivElement.innerHTML = `
     <div class="d-flex justify-content-between align-items-center mb-3">
       <h2 class="mb-0">
-        <span style="font-size:1.4rem;">🛝</span> Spielplätze
+        <span style="font-size:1.4rem;">🛝</span> ${escapeHtml(configdata.titel || "Spielplätze")}
       </h2>
       <small class="text-muted">Steglitz-Zehlendorf · Berlin Open Data</small>
     </div>
+    <div id="sp-datenstand-wrap"></div>
 
     <div class="card mb-3 border-0 bg-light">
       <div class="card-body py-2">
@@ -107,7 +132,15 @@ function app(configdata = {}, enclosingHtmlDivElement) {
         <button id="sp-next" type="button" class="btn btn-outline-secondary btn-sm">Weiter</button>
       </div>
     </div>
+    <div id="sp-weitere-infos-wrap"></div>
   `;
+
+  // Schale 4: Weitere Informationen sofort rendern
+  const weitereHtml = renderWeitereInfos(configdata);
+  if (weitereHtml) {
+    const wel = enclosingHtmlDivElement.querySelector("#sp-weitere-infos-wrap");
+    if (wel) wel.innerHTML = weitereHtml;
+  }
 
   const rawApiUrl =
     typeof configdata.apiurl === "string" ? configdata.apiurl.trim() : "";
@@ -127,6 +160,11 @@ function app(configdata = {}, enclosingHtmlDivElement) {
   // --- Daten laden (nicht-async, via .then()) ---
   fetchCSVViaProxy(apiUrl)
     .then(function (csvText) {
+      // Schale 4: Datenfrische aus Last-Modified anzeigen
+      if (spDatenStand) {
+        const dsEl = enclosingHtmlDivElement.querySelector("#sp-datenstand-wrap");
+        if (dsEl) dsEl.innerHTML = '<div class="text-muted small mb-2">Datenstand: ' + escapeHtml(spDatenStand) + '</div>';
+      }
       const spielplaetze = parseCSV(csvText);
       waitForLeafletThenInit(spielplaetze, enclosingHtmlDivElement);
     })
@@ -198,6 +236,15 @@ async function fetchCSVDirect(apiUrl) {
   const response = await fetch(apiUrl, { method: "GET" });
   if (!response.ok) {
     throw new Error(`GET ${apiUrl} -> HTTP ${response.status}`);
+  }
+
+  // Datenfrische aus Last-Modified header
+  const lastMod = response.headers.get("last-modified");
+  if (lastMod) {
+    const d = new Date(lastMod);
+    if (!isNaN(d.getTime())) {
+      spDatenStand = d.toLocaleDateString("de-DE");
+    }
   }
 
   return response.text();

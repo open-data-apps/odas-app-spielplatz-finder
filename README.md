@@ -52,6 +52,12 @@ Hinweis: Boolesche Felder werden aktuell mit J als positiv ausgewertet.
 
 ---
 
+## Für wen ist diese App?
+
+Diese App hilft Familien, den passenden Spielplatz in Berlin zu finden. Filtern Sie nach Ortsteil, Ausstattung und Barrierefreiheit.
+
+---
+
 ## Entwicklung
 
 Voraussetzungen: Docker / Docker Compose, Make
@@ -96,9 +102,8 @@ Konfiguration wird bei lokaler Entwicklung aus [odas-config/config.json](odas-co
 
 ## Technische Hinweise
 
-- Primärer Datenabruf über lokalen Proxy-Endpunkt /odp-data?path=...
+- Datenabruf über lokalen Proxy-Endpunkt /odp-data?path=...
 - Der path-Parameter wird URL-kodiert übertragen
-- Fallback auf allorigins, falls Proxy nicht verfügbar ist
 
 ---
 
