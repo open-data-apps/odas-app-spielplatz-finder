@@ -9,15 +9,31 @@
   "kurzbeschreibung": "Karten- und Tabellenansicht von Spielplaetzen mit Filtern auf Basis von Open-Data-CSV.",
   "beschreibung": [
     "_multiline_",
-    "Die App visualisiert Spielplätze in Karte und Tabelle mit Filtern nach Ortsteil, Art, Barrierefreiheit und Ballspielen.",
-    "Die Daten werden als CSV aus dem Open Data Portal Berlin Steglitz-Zehlendorf geladen.",
-    "## Für wen ist diese App?",
-    "Diese App hilft Familien, den passenden Spielplatz in Berlin zu finden. Filtern Sie nach Ortsteil, Ausstattung und Barrierefreiheit.",
-    ""
+    "<p>Die Spielplatz-App zeigt Spielplätze als Karte und Tabelle und macht familienrelevante Standortdaten leichter auffindbar.</p>",
+    "<p>Filter und Suche helfen, passende Orte nach Lage und verfügbaren Angaben einzugrenzen.</p>",
+    "<h3>Inhalte</h3>",
+    "<p>Die App verarbeitet offene CSV-Daten zu Spielplätzen und stellt sie mit Karte, Tabelle und Detailinformationen dar.</p>",
+    "<h3>Nutzung</h3>",
+    "<p>Suchen oder filtern Sie nach Orten und öffnen Sie die Detailinformationen einzelner Spielplätze. Die App zeigt die Informationen der Datenquelle; Öffnungszeiten, Ausstattung und Zustand sollten bei Bedarf vor Ort oder über die zuständige Stelle geprüft werden.</p>",
+    "<h3>Für wen ist diese App?</h3>",
+    "<p>Die App richtet sich an Familien, Bürger:innen, Verwaltung und Quartiersarbeit, die Spielplatzangebote schnell erkunden möchten. Besondere Datenkenntnisse sind für die Nutzung nicht erforderlich.</p>",
+    "<h3>Datenquelle</h3>",
+    "<p>Die Daten werden aus einem offenen CSV-Endpunkt geladen.</p>",
+    "<ul><li><strong>Open Data Portal:</strong> <a href=\"https://www.berlin.de/\" target=\"_blank\" rel=\"noopener\">Berlin.de</a></li><li><strong>Ressource:</strong> <a href=\"https://www.berlin.de/ba-steglitz-zehlendorf/politik-und-verwaltung/aemter/strassen-und-gruenflaechenamt/gruenflaechen/spiel-und-sportplaetze/simple-search-spielplaetze/index.php/index/all.csv?q=\" target=\"_blank\" rel=\"noopener\">CSV-Endpunkt Spielplätze</a></li></ul>",
+    "<h3>Open Data App Store</h3>",
+    "<p>Diese App ist für den Open Data App Store vorbereitet und kann mit Spielplatzdaten anderer Kommunen konfiguriert werden.</p>"
   ],
-  "tags-funktion": ["Karte", "Suche", "Filter"],
-  "tags-dateityp": ["CSV"],
-  "tags-datenart": ["Standortdaten"],
+  "tags-funktion": [
+    "Karte",
+    "Suche",
+    "Filter"
+  ],
+  "tags-dateityp": [
+    "CSV"
+  ],
+  "tags-datenart": [
+    "Standortdaten"
+  ],
   "screenshots": [
     "assets/Desktop_Screenshot.png",
     "assets/Desktop_Screenshot_2.png"
@@ -96,20 +112,19 @@
       },
       "default": [
         "_multiline_",
-        "Die App zeigt Spielplatzdaten als interaktive Karte und durchsuchbare Tabelle mit Filtern.",
-        "Die Daten werden über den lokalen Proxy aus dem Open Data Portal Berlin geladen.",
-        "## Für wen ist diese App?",
-        "Diese App hilft Familien, den passenden Spielplatz in Berlin zu finden. Filtern Sie nach Ortsteil, Ausstattung und Barrierefreiheit.",
-        "## App-Anbieter",
-        "Die App wird bereit gestellt von <a href=\"{{odp.anbieter.url}}\">{{odp.anbieter.name}}</a>",
-        "## Datenquelle",
-        "- **Open Data Portal:** <a href=\"https://www.berlin.de\" target=\"_blank\">Berlin.de</a>",
-        "- **Datensatz:** <a href=\"{{appinstanz.urlDaten}}\" target=\"_blank\">Spielplatz-Datensatz</a>",
-        "- **Ressource:** <a href=\"{{appinstanz.apiurl}}\" target=\"_blank\">CSV-Daten</a>",
-        "## Über diese App",
-        "Die App wurde entwickelt von <a href=\"{{app.developer.url}}\">{{app.developer.name}}</a>. App-Version: {{app.version}}.",
-        "## Open Data App Store",
-        "Der Open Data App Store betrieben von <a href=\"{{odas.betreiber.url}}\">{{odas.betreiber.name}}</a>"
+        "<p>Die Spielplatz-App zeigt Spielplätze als Karte und Tabelle und macht familienrelevante Standortdaten leichter auffindbar.</p>",
+        "<p>Filter und Suche helfen, passende Orte nach Lage und verfügbaren Angaben einzugrenzen.</p>",
+        "<h3>Inhalte</h3>",
+        "<p>Die App verarbeitet offene CSV-Daten zu Spielplätzen und stellt sie mit Karte, Tabelle und Detailinformationen dar.</p>",
+        "<h3>Nutzung</h3>",
+        "<p>Suchen oder filtern Sie nach Orten und öffnen Sie die Detailinformationen einzelner Spielplätze. Die App zeigt die Informationen der Datenquelle; Öffnungszeiten, Ausstattung und Zustand sollten bei Bedarf vor Ort oder über die zuständige Stelle geprüft werden.</p>",
+        "<h3>Für wen ist diese App?</h3>",
+        "<p>Die App richtet sich an Familien, Bürger:innen, Verwaltung und Quartiersarbeit, die Spielplatzangebote schnell erkunden möchten. Besondere Datenkenntnisse sind für die Nutzung nicht erforderlich.</p>",
+        "<h3>Datenquelle</h3>",
+        "<p>Die Daten werden aus einem offenen CSV-Endpunkt geladen.</p>",
+        "<ul><li><strong>Open Data Portal:</strong> <a href=\"https://www.berlin.de/\" target=\"_blank\" rel=\"noopener\">Berlin.de</a></li><li><strong>Ressource:</strong> <a href=\"https://www.berlin.de/ba-steglitz-zehlendorf/politik-und-verwaltung/aemter/strassen-und-gruenflaechenamt/gruenflaechen/spiel-und-sportplaetze/simple-search-spielplaetze/index.php/index/all.csv?q=\" target=\"_blank\" rel=\"noopener\">CSV-Endpunkt Spielplätze</a></li></ul>",
+        "<h3>Open Data App Store</h3>",
+        "<p>Diese App ist für den Open Data App Store vorbereitet und kann mit Spielplatzdaten anderer Kommunen konfiguriert werden.</p>"
       ],
       "erforderlich": "ja"
     },
@@ -150,14 +165,19 @@
       "format": {
         "typ": "markdown"
       },
-      "default": ["_multiline_", "Alle Daten sind geschützt."],
+      "default": [
+        "_multiline_",
+        "Alle Daten sind geschützt."
+      ],
       "erforderlich": "ja"
     },
     "weiterfuehrendeLinks": {
       "label": "Weiterführende Links",
       "hilfe": "Verwandte Datensätze / Hintergrundquellen (Markdown/HTML). Leer = ausgeblendet.",
-      "format": { "typ": "markdown" },
-      "default": "<ul><li><a href=\"https://www.berlin.de/ba-steglitz-zehlendorf/politik-und-verwaltung/aemter/strassen-und-gruenflaechenamt/gruenflaechen/spiel-und-sportplaetze/\" target=\"_blank\">Spielplätze Steglitz-Zehlendorf — Berlin.de</a></li><li><a href=\"https://www.openstreetmap.org/\" target=\"_blank\">OpenStreetMap</a></li></ul>",
+      "format": {
+        "typ": "markdown"
+      },
+      "default": "<ul><li><a href=\"https://www.berlin.de/ba-steglitz-zehlendorf/politik-und-verwaltung/aemter/strassen-und-gruenflaechenamt/gruenflaechen/spiel-und-sportplaetze/simple-search-spielplaetze/\" target=\"_blank\">Spielplätze Steglitz-Zehlendorf — Berlin.de</a></li><li><a href=\"https://www.openstreetmap.org/\" target=\"_blank\">OpenStreetMap</a></li></ul>",
       "erforderlich": "nein"
     },
     "urlDaten": {
@@ -187,8 +207,8 @@
         "typ": "url",
         "laenge": 255
       },
-      "default": "https://www.berlin.de/ba-steglitz-zehlendorf/...simple-search-spielplaetze/index.php/index/all.csv?q=",
-      "beispiel": "https://www.berlin.de/ba-steglitz-zehlendorf/...simple-search-spielplaetze/index.php/index/all.csv?q=",
+      "default": "https://www.berlin.de/ba-steglitz-zehlendorf/politik-und-verwaltung/aemter/strassen-und-gruenflaechenamt/gruenflaechen/spiel-und-sportplaetze/simple-search-spielplaetze/index.php/index/all.csv?q=",
+      "beispiel": "https://www.berlin.de/ba-steglitz-zehlendorf/politik-und-verwaltung/aemter/strassen-und-gruenflaechenamt/gruenflaechen/spiel-und-sportplaetze/simple-search-spielplaetze/index.php/index/all.csv?q=",
       "erforderlich": "ja"
     },
     "sprache": {
@@ -196,10 +216,31 @@
       "hilfe": "Angabe der App-Sprache",
       "format": {
         "typ": "dropdown",
-        "optionen": ["de"],
+        "optionen": [
+          "de"
+        ],
         "default": "de"
       },
       "erforderlich": "ja"
+    },
+    "datenquelleHinweis": {
+      "label": "Methodik / Datenquelle-Hinweis",
+      "hilfe": "Herkunft, Erhebungsmethode und Limitierungen (HTML/Markdown). Leer = ausgeblendet.",
+      "format": {
+        "typ": "markdown"
+      },
+      "default": "<p>Die Spielplatzdaten werden aus einer CSV-Ressource geladen und nach Name, Adresse, Ortsteil, Art und Ausstattungsmerkmalen aufbereitet. Die App zeigt die veröffentlichten Angaben der Quelle; Zustand und Verfügbarkeit vor Ort können davon abweichen.</p>",
+      "erforderlich": "nein"
+    },
+    "datenStand": {
+      "label": "Datenstand",
+      "hilfe": "Freitext-Datum oder Aktualitätshinweis, z.B. Stand: Januar 2025. Leer = ausgeblendet.",
+      "format": {
+        "typ": "string",
+        "laenge": 80
+      },
+      "default": "Stand: abhängig von der Berliner CSV-Ressource",
+      "erforderlich": "nein"
     }
   }
 }

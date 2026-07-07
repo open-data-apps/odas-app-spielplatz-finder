@@ -21,9 +21,39 @@ function renderWeitereInfos(configdata) {
   if (!links) return "";
   return (
     '<section class="sp-weitere-infos mt-4">' +
-    '<h2 class="h5 mb-3">Weitere Informationen</h2>' +
-    '<div class="sp-weitere-infos-content">' +
+    '<button class="sp-toggle btn btn-link text-decoration-none d-flex w-100 justify-content-between align-items-center p-0 collapsed" type="button" ' +
+    'data-bs-toggle="collapse" data-bs-target="#sp-weitere-infos-body" ' +
+    'aria-expanded="false" aria-controls="sp-weitere-infos-body">' +
+    '<h2 class="h5 mb-0">Weitere Informationen</h2>' +
+    '<span class="sp-chevron" aria-hidden="true">&#9662;</span>' +
+    "</button>" +
+    '<div id="sp-weitere-infos-body" class="collapse sp-weitere-infos-content">' +
     links +
+    "</div></section>"
+  );
+}
+
+function renderMethodikbox(configdata) {
+  const methodik = String(configdata.datenquelleHinweis || "").trim();
+  const datenStand = String(configdata.datenStand || "").trim();
+  if (!methodik && !datenStand) return "";
+  let content = "";
+  if (datenStand) {
+    content += '<p><strong>Datenstand:</strong> ' + escapeHtml(datenStand) + "</p>";
+  }
+  if (methodik) {
+    content += methodik;
+  }
+  return (
+    '<section class="sp-methodik mt-4">' +
+    '<button class="sp-toggle btn btn-link text-decoration-none d-flex w-100 justify-content-between align-items-center p-0 collapsed" type="button" ' +
+    'data-bs-toggle="collapse" data-bs-target="#sp-methodik-body" ' +
+    'aria-expanded="false" aria-controls="sp-methodik-body">' +
+    '<h2 class="h5 mb-0">Methodik / Datenquelle</h2>' +
+    '<span class="sp-chevron" aria-hidden="true">&#9662;</span>' +
+    "</button>" +
+    '<div id="sp-methodik-body" class="collapse sp-methodik-content">' +
+    content +
     "</div></section>"
   );
 }
@@ -132,8 +162,15 @@ function app(configdata = {}, enclosingHtmlDivElement) {
         <button id="sp-next" type="button" class="btn btn-outline-secondary btn-sm">Weiter</button>
       </div>
     </div>
+    <div id="sp-methodik-wrap"></div>
     <div id="sp-weitere-infos-wrap"></div>
   `;
+
+  const methodikHtml = renderMethodikbox(configdata);
+  if (methodikHtml) {
+    const mel = enclosingHtmlDivElement.querySelector("#sp-methodik-wrap");
+    if (mel) mel.innerHTML = methodikHtml;
+  }
 
   // Schale 4: Weitere Informationen sofort rendern
   const weitereHtml = renderWeitereInfos(configdata);
