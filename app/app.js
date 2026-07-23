@@ -58,13 +58,82 @@ function renderMethodikbox(configdata) {
   );
 }
 
+function isOdasProxyEnabled(configdata = {}) {
+  return String(configdata.proxyAktiv || "").trim().toLowerCase() === "ja";
+}
+
 function extractPathFromUrl(url) {
   try {
-    const u = new URL(url);
-    return u.pathname + u.search;
-  } catch (e) {
-    return url;
+    const parsedUrl = new URL(url);
+    return parsedUrl.pathname + parsedUrl.search;
+  } catch (_error) {
+    return String(url || "");
   }
+}
+
+function getOdasAppBasePath(pathname) {
+  let appPath =
+    pathname === undefined
+      ? typeof window !== "undefined"
+        ? window.location.pathname
+        : "/"
+      : String(pathname || "/");
+
+  if (!appPath.endsWith("/")) {
+    const lastSlashIndex = appPath.lastIndexOf("/");
+    const lastSegment = appPath.substring(lastSlashIndex + 1);
+    if (lastSegment.includes(".")) {
+      appPath = appPath.substring(0, lastSlashIndex + 1);
+    }
+  }
+
+  return appPath.replace(/\/+$/, "");
+}
+
+function getOdasProxyEndpoint(targetUrl, pathname) {
+  const appPath = getOdasAppBasePath(pathname);
+  return `${appPath}/odp-data?path=${encodeURIComponent(
+    extractPathFromUrl(targetUrl),
+  )}`;
+}
+
+async function fetchViaOdasProxy(targetUrl) {
+  const response = await fetch(getOdasProxyEndpoint(targetUrl), {
+    method: "POST",
+  });
+
+  if (!response.ok) {
+    throw new Error(`ODAS-Proxy-Fehler: HTTP ${response.status}`);
+  }
+
+  const proxyData = await response.json();
+  if (!proxyData || typeof proxyData.content !== "string") {
+    throw new Error("ODAS-Proxy-Antwort enthält keinen content-String.");
+  }
+
+  return proxyData.content;
+}
+
+async function fetchOdasResource(targetUrl, configdata = {}) {
+  if (isOdasProxyEnabled(configdata)) {
+    return fetchViaOdasProxy(targetUrl);
+  }
+
+  try {
+    const response = await fetch(targetUrl);
+    if (!response.ok) {
+      throw new Error(`HTTP ${response.status}`);
+    }
+    return response.text();
+  } catch (error) {
+    throw new Error(
+      `Direkter Datenabruf fehlgeschlagen (${error.message}). Bitte prüfen Sie die Daten-URL und die CORS-Freigabe der Datenquelle.`,
+    );
+  }
+}
+
+async function fetchOdasJson(targetUrl, configdata = {}) {
+  return JSON.parse(await fetchOdasResource(targetUrl, configdata));
 }
 
 function app(configdata = {}, enclosingHtmlDivElement) {
@@ -195,7 +264,7 @@ function app(configdata = {}, enclosingHtmlDivElement) {
   }
 
   // --- Daten laden (nicht-async, via .then()) ---
-  fetchCSVViaProxy(apiUrl)
+  fetchSpielplatzCsv(apiUrl, configdata)
     .then(function (csvText) {
       // Schale 4: Datenfrische aus Last-Modified anzeigen
       if (spDatenStand) {
@@ -222,51 +291,12 @@ function app(configdata = {}, enclosingHtmlDivElement) {
   }
 }
 
-async function fetchCSVViaProxy(apiUrl) {
-  let directError = "";
-  try {
-    // Quelle liefert Access-Control-Allow-Origin: * -> Direktabruf zuerst.
-    return await fetchCSVDirect(apiUrl);
-  } catch (err) {
-    directError = err.message;
+async function fetchSpielplatzCsv(apiUrl, configdata = {}) {
+  // Standard ist der Direktabruf; der ODAS-Proxy nur bei proxyAktiv=ja.
+  if (isOdasProxyEnabled(configdata)) {
+    return fetchViaOdasProxy(apiUrl);
   }
-
-  const fullPath = window.location.pathname.replace(/\/+$/, "");
-  const pathCandidates = [apiUrl, extractPathFromUrl(apiUrl)];
-
-  let lastProxyError = "";
-
-  for (const pathCandidate of pathCandidates) {
-    const proxyEndpoint =
-      `${fullPath}/odp-data?` +
-      new URLSearchParams({ path: pathCandidate }).toString();
-
-    const response = await fetch(proxyEndpoint, { method: "POST" });
-    if (!response.ok) {
-      const details = await safeReadErrorResponse(response);
-      lastProxyError = `POST ${proxyEndpoint} -> HTTP ${response.status}${details ? ` (${details})` : ""}`;
-      continue;
-    }
-
-    return readCsvFromResponse(response);
-  }
-
-  throw new Error(
-    `Direktabruf fehlgeschlagen: ${directError || "unbekannter Fehler"}` +
-      `${lastProxyError ? ` | Proxy fehlgeschlagen: ${lastProxyError}` : ""}`,
-  );
-}
-
-async function readCsvFromResponse(response) {
-  const contentType = response.headers.get("content-type") || "";
-  if (contentType.includes("application/json")) {
-    const payload = await response.json();
-    if (payload && typeof payload.content === "string") return payload.content;
-    if (typeof payload === "string") return payload;
-    throw new Error("Proxy-Antwort enthält keinen lesbaren CSV-Inhalt");
-  }
-
-  return response.text();
+  return fetchCSVDirect(apiUrl);
 }
 
 async function fetchCSVDirect(apiUrl) {
@@ -301,27 +331,6 @@ function normalizeApiUrl(apiUrl) {
 
   if (apiUrl.includes("...")) return "";
   return apiUrl;
-}
-
-async function safeReadErrorResponse(response) {
-  try {
-    const contentType = response.headers.get("content-type") || "";
-    if (contentType.includes("application/json")) {
-      const payload = await response.json();
-      if (payload && typeof payload.message === "string")
-        return payload.message;
-      if (payload && typeof payload.error === "string") return payload.error;
-      if (payload && typeof payload.content === "string") {
-        return payload.content.slice(0, 200).replace(/\s+/g, " ").trim();
-      }
-      return "";
-    }
-
-    const text = await response.text();
-    return (text || "").slice(0, 200).replace(/\s+/g, " ").trim();
-  } catch (e) {
-    return "";
-  }
 }
 
 /* ------------------------------------------------------------------ */
