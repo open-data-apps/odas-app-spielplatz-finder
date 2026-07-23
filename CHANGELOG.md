@@ -7,6 +7,7 @@
 - **ENH:** Traefik-Anbindung auf das externe Netzwerk `proxynet`, den EntryPoint `websecure` und den Zertifikatsresolver `letsencrypt` festgelegt
 - **FIX:** Proxy-Basispfad funktioniert jetzt auch bei URLs mit `index.html`; der Ziel-Pfad wird URL-kodiert
 - **FIX:** Raten-Schleife über Proxy-Kandidaten durch den eindeutigen Schalter ersetzt
+- **FIX:** Liefer-ZIP enthält nur noch `app/`, `assets/`, `app-package.json` und `CHANGELOG.md`; `odas-config/`, `README.md` und `Makefile` sind lokal und gehören nicht in die Auslieferung
 - **DOC:** Start über `STANDALONE=true make up` dokumentiert
 
 ## 1.1.0 - 2026-04-16

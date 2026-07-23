@@ -64,7 +64,7 @@ config: ## show docker-compose config
 
 zip: ## App zur Auslieferung vorbereiten
 	zip -r ${current_dir}.zip \
-	 	app assets odas-config app-package.json CHANGELOG.md README.md Makefile
+	 	app assets app-package.json CHANGELOG.md
 
 check-app: ## App prüfen mit Skript aus ODAS-Tools
 	echo "App prüfen"
