@@ -3,7 +3,7 @@
   "app-entwickler-name": "ondics-gmbh",
   "name-in-url": "Spielplaetze",
   "name": "Spielplätze",
-  "version": "1.5.0",
+  "version": "1.6.0",
   "odas-app-icon": "assets/odas-app-icon.svg",
   "app-icon": "assets/odas-app-icon.svg",
   "kurzbeschreibung": "Karten- und Tabellenansicht von Spielplaetzen mit Filtern auf Basis von Open-Data-CSV.",
@@ -40,7 +40,7 @@
   ],
   "daten": {
     "beschreibung": "CSV-Daten aus einem Open Data Portal werden ueber den lokalen Proxy geladen und in Karte sowie Tabelle dargestellt.",
-    "schema": "",
+    "schema": "assets/schema.json",
     "beispiel": "",
     "beispiel-url": ""
   },
@@ -51,16 +51,6 @@
       "label": "Seitentitel",
       "hilfe": "Der Seitentitel wird im Browser-Tab der App angezeigt",
       "default": "Spielplätze",
-      "format": {
-        "typ": "string",
-        "laenge": 50
-      },
-      "erforderlich": "ja"
-    },
-    "lizenz": {
-      "label": "Lizenz",
-      "hilfe": "Angabe der Lizenz, die für die Nutzung der App gilt.",
-      "default": "Open Software License (OSL)",
       "format": {
         "typ": "string",
         "laenge": 50
@@ -182,7 +172,7 @@
       "label": "Fußzeile",
       "hilfe": "Wird auf der Website unten in der Fusszeile angezeigt.",
       "format": {
-        "typ": "String",
+        "typ": "string",
         "laenge": 50
       },
       "default": "(C) Copyright {{jahr}} | App & Daten: {{odp.anbieter.name}} | App-Entwickler: {{app.developer.name}} | ODAS: {{odas.betreiber.name}}",
@@ -215,12 +205,12 @@
     "sprache": {
       "label": "Sprache der App",
       "hilfe": "Angabe der App-Sprache",
+      "default": "de",
       "format": {
         "typ": "dropdown",
         "optionen": [
           "de"
-        ],
-        "default": "de"
+        ]
       },
       "erforderlich": "ja"
     },
@@ -241,6 +231,26 @@
         "laenge": 80
       },
       "default": "Stand: abhängig von der Berliner CSV-Ressource",
+      "erforderlich": "nein"
+    },
+    "brandingCSS": {
+      "label": "Zusätzliches Branding-CSS",
+      "hilfe": "Optionaler CSS-Code für die konkrete App-Instanz.",
+      "default": "",
+      "format": {
+        "typ": "string",
+        "laenge": 10000
+      },
+      "erforderlich": "nein"
+    },
+    "brandingCSSFile": {
+      "label": "Branding-CSS-Datei",
+      "hilfe": "Optionale URL zu einer zusätzlichen CSS-Datei für die konkrete App-Instanz.",
+      "default": "",
+      "format": {
+        "typ": "url",
+        "laenge": 500
+      },
       "erforderlich": "nein"
     }
   }

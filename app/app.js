@@ -572,10 +572,10 @@ function initApp(data, container) {
   const selOrt = document.getElementById("sp-ortsteil");
   const selArt = document.getElementById("sp-art");
   ortsteile.forEach(function (o) {
-    selOrt.innerHTML += `<option value="${o}">${o}</option>`;
+    selOrt.innerHTML += `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`;
   });
   arten.forEach(function (a) {
-    selArt.innerHTML += `<option value="${a}">${a}</option>`;
+    selArt.innerHTML += `<option value="${escapeHtml(a)}">${escapeHtml(a)}</option>`;
   });
 
   // Badge-Helper
@@ -861,13 +861,13 @@ function initApp(data, container) {
 
           return `<tr data-row-key="${rowKeyAttr}" style="cursor:pointer;">
           <td>
-            <div class="fw-semibold">${sp.name || "<em class='text-muted'>–</em>"}</div>
-            <div class="small text-muted">${addressLine || "–"}</div>
-            ${sp.schliesszeiten ? `<div class="small text-muted">🕐 ${sp.schliesszeiten}</div>` : ""}
+            <div class="fw-semibold">${sp.name ? escapeHtml(sp.name) : "<em class='text-muted'>–</em>"}</div>
+            <div class="small text-muted">${escapeHtml(addressLine) || "–"}</div>
+            ${sp.schliesszeiten ? `<div class="small text-muted">🕐 ${escapeHtml(sp.schliesszeiten)}</div>` : ""}
           </td>
-          <td>${sp.ortsteil || "–"}</td>
-          <td>${sp.art || "–"}</td>
-          <td class="text-end">${sp.flaeche || "–"}</td>
+          <td>${escapeHtml(sp.ortsteil) || "–"}</td>
+          <td>${escapeHtml(sp.art) || "–"}</td>
+          <td class="text-end">${escapeHtml(sp.flaeche) || "–"}</td>
           <td class="text-center">${badge(sp.ballspielen)}</td>
           <td class="text-center">${tischtennisBadge}</td>
           <td class="text-center">${badge(sp.barrierefrei)}</td>
