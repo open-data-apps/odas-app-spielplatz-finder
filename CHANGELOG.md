@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.7.0 - 2026-07-31
+- CHG: Platzhalter-Titel in der lokalen Konfiguration durch den echten App-Titel ersetzt
+
 ## 1.6.0 - 2026-07-31
 - FIX: Quelldaten und string-Config-Werte werden vor der HTML-Ausgabe maskiert (F-08)
 - CHG: toter Konfigurationsschlüssel lizenz entfernt (F-17)
