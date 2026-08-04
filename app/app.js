@@ -928,13 +928,13 @@ function addToHead() {
   // Leaflet CSS
   const leafletCss = document.createElement("link");
   leafletCss.rel = "stylesheet";
-  leafletCss.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+  leafletCss.href = "vendor/leaflet/leaflet.css";
   leafletCss.crossOrigin = "anonymous";
   document.head.appendChild(leafletCss);
 
   // Leaflet JS
   const leafletJs = document.createElement("script");
-  leafletJs.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+  leafletJs.src = "vendor/leaflet/leaflet.js";
   leafletJs.async = false;
   leafletJs.crossOrigin = "anonymous";
   document.head.appendChild(leafletJs);
