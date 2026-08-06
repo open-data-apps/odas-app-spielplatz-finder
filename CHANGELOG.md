@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.14.0 - 2026-08-06
+- CHG: DOM-Zugriffe auf den App-Container gescopt (F-25, Tranche 3): alle Elemente der App werden über den App-Container (container.querySelector) angesprochen statt über document; unpräfixierte ID `data-spinner` mit `sp-`-Präfix versehen (`data-spinner` → `sp-data-spinner`); die Helper-`forEach`-Schleifen über `sp-search`/`sp-ortsteil`/`sp-art` bzw. `sp-barrierefrei`/`sp-ballspielen` scopen ihre Zugriffe an jeweils einer Stelle
+
 ## 1.13.0 - 2026-08-06
 - FIX: Datenschutzangabe beschreibt den tatsaechlichen Stand nach dem Vendoring (Welle G)
 

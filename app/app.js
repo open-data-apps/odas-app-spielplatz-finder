@@ -187,7 +187,7 @@ function app(configdata = {}, enclosingHtmlDivElement) {
     <p id="sp-map-status" class="text-muted small mb-3">Karte wird vorbereitet …</p>
 
     <p id="sp-count" class="text-muted small mb-2">
-      <span id="data-spinner" style="vertical-align:middle;">
+      <span id="sp-data-spinner" style="vertical-align:middle;">
         <span class="spinner-border text-primary spinner-border-sm" role="status"
               style="width:1.2rem;height:1.2rem;">
           <span class="visually-hidden">Laden...</span>
@@ -282,11 +282,11 @@ function app(configdata = {}, enclosingHtmlDivElement) {
   return null;
 
   function showLoadError(message) {
-    document.getElementById("sp-tbody").innerHTML =
+    enclosingHtmlDivElement.querySelector("#sp-tbody").innerHTML =
       `<tr><td colspan="7" class="text-danger text-center">
          Fehler beim Laden der Daten: ${message}
        </td></tr>`;
-    const s = document.getElementById("data-spinner");
+    const s = enclosingHtmlDivElement.querySelector("#sp-data-spinner");
     if (s) s.style.display = "none";
   }
 }
@@ -344,7 +344,7 @@ function waitForLeafletThenInit(data, container) {
       return;
     }
     if (tries++ > 80) {
-      document.getElementById("sp-tbody").innerHTML =
+      container.querySelector("#sp-tbody").innerHTML =
         `<tr><td colspan="9" class="text-danger text-center">
            Leaflet konnte nicht geladen werden.
          </td></tr>`;
@@ -479,7 +479,7 @@ function isTruthyValue(value) {
 /* ------------------------------------------------------------------ */
 function initApp(data, container) {
   // Spinner ausblenden
-  const spinner = document.getElementById("data-spinner");
+  const spinner = container.querySelector("#sp-data-spinner");
   if (spinner) spinner.style.display = "none";
 
   // Felder normalisieren
@@ -533,7 +533,7 @@ function initApp(data, container) {
     maxZoom: 19,
   }).addTo(map);
   const markerLayer = L.layerGroup().addTo(map);
-  const mapStatus = document.getElementById("sp-map-status");
+  const mapStatus = container.querySelector("#sp-map-status");
 
   const geocodeCache = new Map();
   const geocodeInFlight = new Set();
@@ -544,10 +544,10 @@ function initApp(data, container) {
   let renderScheduled = false;
   let currentPage = 1;
 
-  const pageSizeSelect = document.getElementById("sp-page-size");
-  const pageInfo = document.getElementById("sp-page-info");
-  const prevBtn = document.getElementById("sp-prev");
-  const nextBtn = document.getElementById("sp-next");
+  const pageSizeSelect = container.querySelector("#sp-page-size");
+  const pageInfo = container.querySelector("#sp-page-info");
+  const prevBtn = container.querySelector("#sp-prev");
+  const nextBtn = container.querySelector("#sp-next");
 
   // Dropdowns befüllen
   const ortsteile = [
@@ -569,8 +569,8 @@ function initApp(data, container) {
     ),
   ].sort();
 
-  const selOrt = document.getElementById("sp-ortsteil");
-  const selArt = document.getElementById("sp-art");
+  const selOrt = container.querySelector("#sp-ortsteil");
+  const selArt = container.querySelector("#sp-art");
   ortsteile.forEach(function (o) {
     selOrt.innerHTML += `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`;
   });
@@ -610,7 +610,7 @@ function initApp(data, container) {
   }
 
   function highlightSelectedRow() {
-    const tbody = document.getElementById("sp-tbody");
+    const tbody = container.querySelector("#sp-tbody");
     tbody.querySelectorAll("tr[data-row-key]").forEach(function (rowEl) {
       const rowKey = decodeURIComponent(
         rowEl.getAttribute("data-row-key") || "",
@@ -802,11 +802,11 @@ function initApp(data, container) {
 
   // Render-Funktion
   function render() {
-    const q = document.getElementById("sp-search").value.toLowerCase();
+    const q = container.querySelector("#sp-search").value.toLowerCase();
     const ort = selOrt.value;
     const art = selArt.value;
-    const barrier = document.getElementById("sp-barrierefrei").checked;
-    const ball = document.getElementById("sp-ballspielen").checked;
+    const barrier = container.querySelector("#sp-barrierefrei").checked;
+    const ball = container.querySelector("#sp-ballspielen").checked;
     const pageSize = parseInt(pageSizeSelect.value, 10) || 20;
 
     const filtered = normalized.filter(function (sp) {
@@ -827,7 +827,7 @@ function initApp(data, container) {
     const paged = filtered.slice(pageStart, pageStart + pageSize);
 
     // Zähler
-    document.getElementById("sp-count").textContent =
+    container.querySelector("#sp-count").textContent =
       filtered.length +
       " Spielplatz" +
       (filtered.length !== 1 ? "plätze" : "") +
@@ -840,7 +840,7 @@ function initApp(data, container) {
     nextBtn.disabled = currentPage >= totalPages;
 
     // Tabelle
-    const tbody = document.getElementById("sp-tbody");
+    const tbody = container.querySelector("#sp-tbody");
     latestRowsByKey = new Map(
       paged.map(function (sp) {
         return [getRowKey(sp), sp];
@@ -888,15 +888,15 @@ function initApp(data, container) {
   }
 
   ["sp-search", "sp-ortsteil", "sp-art"].forEach(function (id) {
-    document.getElementById(id).addEventListener("input", resetPageAndRender);
+    container.querySelector("#" + id).addEventListener("input", resetPageAndRender);
   });
   ["sp-barrierefrei", "sp-ballspielen"].forEach(function (id) {
-    document.getElementById(id).addEventListener("change", resetPageAndRender);
+    container.querySelector("#" + id).addEventListener("change", resetPageAndRender);
   });
 
   pageSizeSelect.addEventListener("change", resetPageAndRender);
-  document
-    .getElementById("sp-tbody")
+  container
+    .querySelector("#sp-tbody")
     .addEventListener("click", function (event) {
       const rowEl = event.target.closest("tr[data-row-key]");
       if (!rowEl) return;
