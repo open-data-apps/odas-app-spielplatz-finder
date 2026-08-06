@@ -146,12 +146,9 @@ ausgeliefert.
 
 Beim Aufruf dieser App werden folgende externe Server kontaktiert:
 
-- `cdn.jsdelivr.net` — Bootstrap (Layout- und UI-Framework)
-- `unpkg.com` — Leaflet (Kartendarstellung)
 - `tile.openstreetmap.org` — Kartenkacheln (OpenStreetMap)
-- `nominatim.openstreetmap.org` — Adresssuche / Geokodierung
 
-Diese Anbieter bleiben auch im Standalone-Betrieb extern; ein vollständig autarker Betrieb ohne Internetzugang ist derzeit nicht möglich (siehe F-07 in `Review.md`).
+Diese Anbieter bleiben auch im Standalone-Betrieb extern; ein vollständig autarker Betrieb ohne Internetzugang ist derzeit nicht möglich. Bootstrap, Leaflet und Chart.js werden seit Version 1.10.0 lokal aus `app/vendor/` ausgeliefert und nicht mehr extern geladen.
 
 ### Auslieferung an den ODAS
 
