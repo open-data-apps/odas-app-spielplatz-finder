@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.15.0 - 2026-08-07
+- FIX: Bootstrap-Ziele instanzeindeutig machen (F-32): `data-bs-target`, `aria-controls` und die div-IDs der Methodik-Box (`sp-methodik-body`) und der Box „Weitere Informationen" (`sp-weitere-infos-body`) werden pro App-Instanz mit einer UID versehen (`sp-methodik-body-i1`, `-i2`, …), damit mehrere Instanzen der App auf einer Seite nicht kollidieren
+- FIX: Leaflet-Karte wird über den App-Container statt über die dokumentweite ID gesucht (`L.map(container.querySelector("#sp-map"))`), damit bei mehreren Instanzen jede Instanz ihre eigene Karte initialisiert
+
 ## 1.14.0 - 2026-08-06
 - CHG: DOM-Zugriffe auf den App-Container gescopt (F-25, Tranche 3): alle Elemente der App werden über den App-Container (container.querySelector) angesprochen statt über document; unpräfixierte ID `data-spinner` mit `sp-`-Präfix versehen (`data-spinner` → `sp-data-spinner`); die Helper-`forEach`-Schleifen über `sp-search`/`sp-ortsteil`/`sp-art` bzw. `sp-barrierefrei`/`sp-ballspielen` scopen ihre Zugriffe an jeweils einer Stelle
 

@@ -5,6 +5,8 @@
  */
 
 let spDatenStand = null;
+let spInstanzZaehler = 0;
+let spUid = "i1";
 
 function escapeHtml(str) {
   if (str === null || str === undefined) return "";
@@ -22,12 +24,12 @@ function renderWeitereInfos(configdata) {
   return (
     '<section class="sp-weitere-infos mt-4">' +
     '<button class="sp-toggle btn btn-link text-decoration-none d-flex w-100 justify-content-between align-items-center p-0 collapsed" type="button" ' +
-    'data-bs-toggle="collapse" data-bs-target="#sp-weitere-infos-body" ' +
-    'aria-expanded="false" aria-controls="sp-weitere-infos-body">' +
+    'data-bs-toggle="collapse" data-bs-target="#sp-weitere-infos-body-' + spUid + '" ' +
+    'aria-expanded="false" aria-controls="sp-weitere-infos-body-' + spUid + '">' +
     '<h2 class="h5 mb-0">Weitere Informationen</h2>' +
     '<span class="sp-chevron" aria-hidden="true">&#9662;</span>' +
     "</button>" +
-    '<div id="sp-weitere-infos-body" class="collapse sp-weitere-infos-content">' +
+    '<div id="sp-weitere-infos-body-' + spUid + '" class="collapse sp-weitere-infos-content">' +
     links +
     "</div></section>"
   );
@@ -47,12 +49,12 @@ function renderMethodikbox(configdata) {
   return (
     '<section class="sp-methodik mt-4">' +
     '<button class="sp-toggle btn btn-link text-decoration-none d-flex w-100 justify-content-between align-items-center p-0 collapsed" type="button" ' +
-    'data-bs-toggle="collapse" data-bs-target="#sp-methodik-body" ' +
-    'aria-expanded="false" aria-controls="sp-methodik-body">' +
+    'data-bs-toggle="collapse" data-bs-target="#sp-methodik-body-' + spUid + '" ' +
+    'aria-expanded="false" aria-controls="sp-methodik-body-' + spUid + '">' +
     '<h2 class="h5 mb-0">Methodik / Datenquelle</h2>' +
     '<span class="sp-chevron" aria-hidden="true">&#9662;</span>' +
     "</button>" +
-    '<div id="sp-methodik-body" class="collapse sp-methodik-content">' +
+    '<div id="sp-methodik-body-' + spUid + '" class="collapse sp-methodik-content">' +
     content +
     "</div></section>"
   );
@@ -137,6 +139,7 @@ async function fetchOdasJson(targetUrl, configdata = {}) {
 }
 
 function app(configdata = {}, enclosingHtmlDivElement) {
+  spUid = "i" + ++spInstanzZaehler;
   // --- Skeleton sofort rendern ---
   enclosingHtmlDivElement.innerHTML = `
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -526,7 +529,7 @@ function initApp(data, container) {
   });
 
   // Leaflet-Karte
-  const map = L.map("sp-map").setView([52.43, 13.32], 12);
+  const map = L.map(container.querySelector("#sp-map")).setView([52.43, 13.32], 12);
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution:
       '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
