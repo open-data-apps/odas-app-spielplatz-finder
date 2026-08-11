@@ -18,6 +18,11 @@ function escapeHtml(str) {
     .replace(/'/g, "&#39;");
 }
 
+function safeHttpUrl(value) {
+  const s = String(value || "").trim();
+  return /^https?:\/\//i.test(s) ? s : "";
+}
+
 function renderWeitereInfos(configdata) {
   const links = String(configdata.weiterfuehrendeLinks || "").trim();
   if (!links) return "";
@@ -739,19 +744,22 @@ function initApp(data, container) {
       if (Array.isArray(coords) && coords.length === 2) {
         const marker = L.marker(coords);
         marker.bindPopup(
-          "<strong>" +
-            (sp.name || "Spielplatz") +
-            "</strong><br>" +
-            [sp.strasse, sp.plz, sp.ortsteil].filter(Boolean).join(" · ") +
+          `<strong>${escapeHtml(sp.name) || "Spielplatz"}</strong><br>` +
+            [sp.strasse, sp.plz, sp.ortsteil]
+              .filter(Boolean)
+              .map(escapeHtml)
+              .join(" · ") +
             "<br><em>" +
-            (sp.art || "") +
+            escapeHtml(sp.art) +
             "</em><br>" +
             (isTruthyValue(sp.barrierefrei) ? "♿ Barrierefrei " : "") +
             (isTruthyValue(sp.ballspielen) ? "⚽ Ballspielen " : "") +
             (sp.tischtennisCount > 0 || isTruthyValue(sp.tischtennis)
               ? "🏓 Tischtennis"
               : "") +
-            (sp.schliesszeiten ? "<br>🕐 " + sp.schliesszeiten : ""),
+            (sp.schliesszeiten
+              ? "<br>🕐 " + escapeHtml(sp.schliesszeiten)
+              : ""),
         );
         markerLayer.addLayer(marker);
         markerByKey.set(rowKey, marker);

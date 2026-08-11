@@ -147,6 +147,7 @@ ausgeliefert.
 Beim Aufruf dieser App werden folgende externe Server kontaktiert:
 
 - `tile.openstreetmap.org` — Kartenkacheln (OpenStreetMap)
+- `nominatim.openstreetmap.org` — Adress-Suche (Nominatim); übertragen: Adressbestandteile der Spielplätze ohne Koordinaten, IP-Adresse, User-Agent; Abruf nur bei fehlenden Koordinaten
 
 Diese Anbieter bleiben auch im Standalone-Betrieb extern; ein vollständig autarker Betrieb ohne Internetzugang ist derzeit nicht möglich. Alle Programmbibliotheken werden lokal aus `app/vendor/` ausgeliefert und nicht mehr extern geladen.
 

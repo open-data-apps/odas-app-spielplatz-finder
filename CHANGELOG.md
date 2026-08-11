@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.16.0 - 2026-08-11
+- FIX: XSS- und URL-Vertrag geschlossen; Nominatim offengelegt (F-35, F-36)
+
 ## 1.15.0 - 2026-08-07
 - FIX: Bootstrap-Ziele instanzeindeutig machen (F-32): `data-bs-target`, `aria-controls` und die div-IDs der Methodik-Box (`sp-methodik-body`) und der Box „Weitere Informationen" (`sp-weitere-infos-body`) werden pro App-Instanz mit einer UID versehen (`sp-methodik-body-i1`, `-i2`, …), damit mehrere Instanzen der App auf einer Seite nicht kollidieren
 - FIX: Leaflet-Karte wird über den App-Container statt über die dokumentweite ID gesucht (`L.map(container.querySelector("#sp-map"))`), damit bei mehreren Instanzen jede Instanz ihre eigene Karte initialisiert
