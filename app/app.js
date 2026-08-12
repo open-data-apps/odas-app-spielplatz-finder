@@ -143,6 +143,21 @@ async function fetchOdasJson(targetUrl, configdata = {}) {
   return JSON.parse(await fetchOdasResource(targetUrl, configdata));
 }
 
+// F-51: Container -> Teardown-Callback.
+const spTeardowns = new Map();
+
+/* Wird von app/app-base.js zu Beginn von loadPage() aufgerufen. */
+function onPageLeave(page) {
+  spTeardowns.forEach((teardown, container) => {
+    try {
+      teardown();
+    } catch (error) {
+      console.warn("Fehler beim Abraeumen der Spielplatz-Instanz:", error);
+    }
+    spTeardowns.delete(container);
+  });
+}
+
 function app(configdata = {}, enclosingHtmlDivElement) {
   spUid = "i" + ++spInstanzZaehler;
   // --- Skeleton sofort rendern ---
@@ -535,6 +550,15 @@ function initApp(data, container) {
 
   // Leaflet-Karte
   const map = L.map(container.querySelector("#sp-map")).setView([52.43, 13.32], 12);
+  // F-51: Abbaufunktion dieser Instanz registrieren. Schluessel ist `container` —
+  // diese Funktion laeuft in initApp(), nicht in app().
+  spTeardowns.set(container, function () {
+    try {
+      map.remove();
+    } catch (error) {
+      console.warn("Fehler beim Entfernen der Leaflet-Karte:", error);
+    }
+  });
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution:
       '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',

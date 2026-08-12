@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.17.0 - 2026-08-12
+- FIX: Laufzeitressourcen einer Leaflet-Instanz werden beim Seitenwechsel freigegeben (F-51): neue Registry `spTeardowns` (Container -> Teardown-Callback) mit Modul-Hook `onPageLeave`; `initApp()` registriert die Abbaufunktion der Karte mit dem App-Container als Schluessel, sodass beim Verlassen der Seite keine Leaflet-Instanz samt Resize-Handlern zurueckbleibt
+
 ## 1.16.0 - 2026-08-11
 - FIX: XSS- und URL-Vertrag geschlossen; Nominatim offengelegt (F-35, F-36)
 
