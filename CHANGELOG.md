@@ -1,5 +1,9 @@
 # Changelog
 
+
+## 1.18.0 - 2026-08-12
+- FIX: `app/index.html` auf den Template-Stand (F-47): Datei byte-gleich aus `oda-generic` übernommen — gültiges HTML, deutsche ARIA-Labels, Footer im Body; Titel und Fußzeile bleiben Platzhalter und werden zur Laufzeit aus der Instanz-Config überschrieben
+
 ## 1.17.0 - 2026-08-12
 - FIX: Laufzeitressourcen einer Leaflet-Instanz werden beim Seitenwechsel freigegeben (F-51): neue Registry `spTeardowns` (Container -> Teardown-Callback) mit Modul-Hook `onPageLeave`; `initApp()` registriert die Abbaufunktion der Karte mit dem App-Container als Schluessel, sodass beim Verlassen der Seite keine Leaflet-Instanz samt Resize-Handlern zurueckbleibt
 
