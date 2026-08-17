@@ -4,9 +4,7 @@
  * - @returns {null}
  */
 
-let spDatenStand = null;
 let spInstanzZaehler = 0;
-let spUid = "i1";
 
 function escapeHtml(str) {
   if (str === null || str === undefined) return "";
@@ -23,24 +21,24 @@ function safeHttpUrl(value) {
   return /^https?:\/\//i.test(s) ? s : "";
 }
 
-function renderWeitereInfos(configdata) {
+function renderWeitereInfos(configdata, uid) {
   const links = String(configdata.weiterfuehrendeLinks || "").trim();
   if (!links) return "";
   return (
     '<section class="sp-weitere-infos mt-4">' +
     '<button class="sp-toggle btn btn-link text-decoration-none d-flex w-100 justify-content-between align-items-center p-0 collapsed" type="button" ' +
-    'data-bs-toggle="collapse" data-bs-target="#sp-weitere-infos-body-' + spUid + '" ' +
-    'aria-expanded="false" aria-controls="sp-weitere-infos-body-' + spUid + '">' +
+    'data-bs-toggle="collapse" data-bs-target="#sp-weitere-infos-body-' + uid + '" ' +
+    'aria-expanded="false" aria-controls="sp-weitere-infos-body-' + uid + '">' +
     '<h2 class="h5 mb-0">Weitere Informationen</h2>' +
     '<span class="sp-chevron" aria-hidden="true">&#9662;</span>' +
     "</button>" +
-    '<div id="sp-weitere-infos-body-' + spUid + '" class="collapse sp-weitere-infos-content">' +
+    '<div id="sp-weitere-infos-body-' + uid + '" class="collapse sp-weitere-infos-content">' +
     links +
     "</div></section>"
   );
 }
 
-function renderMethodikbox(configdata) {
+function renderMethodikbox(configdata, uid) {
   const methodik = String(configdata.datenquelleHinweis || "").trim();
   const datenStand = String(configdata.datenStand || "").trim();
   if (!methodik && !datenStand) return "";
@@ -54,12 +52,12 @@ function renderMethodikbox(configdata) {
   return (
     '<section class="sp-methodik mt-4">' +
     '<button class="sp-toggle btn btn-link text-decoration-none d-flex w-100 justify-content-between align-items-center p-0 collapsed" type="button" ' +
-    'data-bs-toggle="collapse" data-bs-target="#sp-methodik-body-' + spUid + '" ' +
-    'aria-expanded="false" aria-controls="sp-methodik-body-' + spUid + '">' +
+    'data-bs-toggle="collapse" data-bs-target="#sp-methodik-body-' + uid + '" ' +
+    'aria-expanded="false" aria-controls="sp-methodik-body-' + uid + '">' +
     '<h2 class="h5 mb-0">Methodik / Datenquelle</h2>' +
     '<span class="sp-chevron" aria-hidden="true">&#9662;</span>' +
     "</button>" +
-    '<div id="sp-methodik-body-' + spUid + '" class="collapse sp-methodik-content">' +
+    '<div id="sp-methodik-body-' + uid + '" class="collapse sp-methodik-content">' +
     content +
     "</div></section>"
   );
@@ -159,7 +157,8 @@ function onPageLeave(page) {
 }
 
 function app(configdata = {}, enclosingHtmlDivElement) {
-  spUid = "i" + ++spInstanzZaehler;
+  const spUid = "i" + ++spInstanzZaehler;
+  const state = { datenStand: null };
   // --- Skeleton sofort rendern ---
   enclosingHtmlDivElement.innerHTML = `
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -192,14 +191,14 @@ function app(configdata = {}, enclosingHtmlDivElement) {
           </div>
           <div class="col-6 col-md-2">
             <div class="form-check mt-3">
-              <input class="form-check-input" type="checkbox" id="sp-barrierefrei">
-              <label class="form-check-label small" for="sp-barrierefrei">♿ Barrierefrei</label>
+              <input class="form-check-input" type="checkbox" id="sp-barrierefrei-${spUid}">
+              <label class="form-check-label small" for="sp-barrierefrei-${spUid}">♿ Barrierefrei</label>
             </div>
           </div>
           <div class="col-6 col-md-2">
             <div class="form-check mt-3">
-              <input class="form-check-input" type="checkbox" id="sp-ballspielen">
-              <label class="form-check-label small" for="sp-ballspielen">⚽ Ballspielen</label>
+              <input class="form-check-input" type="checkbox" id="sp-ballspielen-${spUid}">
+              <label class="form-check-label small" for="sp-ballspielen-${spUid}">⚽ Ballspielen</label>
             </div>
           </div>
         </div>
@@ -244,8 +243,8 @@ function app(configdata = {}, enclosingHtmlDivElement) {
     <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mt-2">
       <div id="sp-page-info" class="small text-muted"></div>
       <div class="d-flex align-items-center gap-2">
-        <label for="sp-page-size" class="small text-muted mb-0">Pro Seite</label>
-        <select id="sp-page-size" class="form-select form-select-sm" style="width:auto;">
+        <label for="sp-page-size-${spUid}" class="small text-muted mb-0">Pro Seite</label>
+        <select id="sp-page-size-${spUid}" class="form-select form-select-sm" style="width:auto;">
           <option value="10">10</option>
           <option value="20" selected>20</option>
           <option value="50">50</option>
@@ -258,14 +257,14 @@ function app(configdata = {}, enclosingHtmlDivElement) {
     <div id="sp-weitere-infos-wrap"></div>
   `;
 
-  const methodikHtml = renderMethodikbox(configdata);
+  const methodikHtml = renderMethodikbox(configdata, spUid);
   if (methodikHtml) {
     const mel = enclosingHtmlDivElement.querySelector("#sp-methodik-wrap");
     if (mel) mel.innerHTML = methodikHtml;
   }
 
   // Schale 4: Weitere Informationen sofort rendern
-  const weitereHtml = renderWeitereInfos(configdata);
+  const weitereHtml = renderWeitereInfos(configdata, spUid);
   if (weitereHtml) {
     const wel = enclosingHtmlDivElement.querySelector("#sp-weitere-infos-wrap");
     if (wel) wel.innerHTML = weitereHtml;
@@ -287,15 +286,15 @@ function app(configdata = {}, enclosingHtmlDivElement) {
   }
 
   // --- Daten laden (nicht-async, via .then()) ---
-  fetchSpielplatzCsv(apiUrl, configdata)
+  fetchSpielplatzCsv(apiUrl, configdata, state)
     .then(function (csvText) {
       // Schale 4: Datenfrische aus Last-Modified anzeigen
-      if (spDatenStand) {
+      if (state.datenStand) {
         const dsEl = enclosingHtmlDivElement.querySelector("#sp-datenstand-wrap");
-        if (dsEl) dsEl.innerHTML = '<div class="text-muted small mb-2">Datenstand: ' + escapeHtml(spDatenStand) + '</div>';
+        if (dsEl) dsEl.innerHTML = '<div class="text-muted small mb-2">Datenstand: ' + escapeHtml(state.datenStand) + '</div>';
       }
       const spielplaetze = parseCSV(csvText);
-      waitForLeafletThenInit(spielplaetze, enclosingHtmlDivElement);
+      waitForLeafletThenInit(spielplaetze, enclosingHtmlDivElement, spUid);
     })
     .catch(function (err) {
       showLoadError(err.message);
@@ -314,15 +313,15 @@ function app(configdata = {}, enclosingHtmlDivElement) {
   }
 }
 
-async function fetchSpielplatzCsv(apiUrl, configdata = {}) {
+async function fetchSpielplatzCsv(apiUrl, configdata = {}, state) {
   // Standard ist der Direktabruf; der ODAS-Proxy nur bei proxyAktiv=ja.
   if (isOdasProxyEnabled(configdata)) {
     return fetchViaOdasProxy(apiUrl);
   }
-  return fetchCSVDirect(apiUrl);
+  return fetchCSVDirect(apiUrl, state);
 }
 
-async function fetchCSVDirect(apiUrl) {
+async function fetchCSVDirect(apiUrl, state) {
   const response = await fetch(apiUrl, { method: "GET" });
   if (!response.ok) {
     throw new Error(`GET ${apiUrl} -> HTTP ${response.status}`);
@@ -333,7 +332,7 @@ async function fetchCSVDirect(apiUrl) {
   if (lastMod) {
     const d = new Date(lastMod);
     if (!isNaN(d.getTime())) {
-      spDatenStand = d.toLocaleDateString("de-DE");
+      state.datenStand = d.toLocaleDateString("de-DE");
     }
   }
 
@@ -359,11 +358,11 @@ function normalizeApiUrl(apiUrl) {
 /* ------------------------------------------------------------------ */
 /*  Warte auf Leaflet, dann App initialisieren                         */
 /* ------------------------------------------------------------------ */
-function waitForLeafletThenInit(data, container) {
+function waitForLeafletThenInit(data, container, uid) {
   let tries = 0;
   function check() {
     if (typeof L !== "undefined") {
-      initApp(data, container);
+      initApp(data, container, uid);
       return;
     }
     if (tries++ > 80) {
@@ -500,7 +499,7 @@ function isTruthyValue(value) {
 /* ------------------------------------------------------------------ */
 /*  App initialisieren (Karte + Tabelle + Filter)                      */
 /* ------------------------------------------------------------------ */
-function initApp(data, container) {
+function initApp(data, container, uid) {
   // Spinner ausblenden
   const spinner = container.querySelector("#sp-data-spinner");
   if (spinner) spinner.style.display = "none";
@@ -576,7 +575,7 @@ function initApp(data, container) {
   let renderScheduled = false;
   let currentPage = 1;
 
-  const pageSizeSelect = container.querySelector("#sp-page-size");
+  const pageSizeSelect = container.querySelector(`#sp-page-size-${uid}`);
   const pageInfo = container.querySelector("#sp-page-info");
   const prevBtn = container.querySelector("#sp-prev");
   const nextBtn = container.querySelector("#sp-next");
@@ -840,8 +839,8 @@ function initApp(data, container) {
     const q = container.querySelector("#sp-search").value.toLowerCase();
     const ort = selOrt.value;
     const art = selArt.value;
-    const barrier = container.querySelector("#sp-barrierefrei").checked;
-    const ball = container.querySelector("#sp-ballspielen").checked;
+    const barrier = container.querySelector(`#sp-barrierefrei-${uid}`).checked;
+    const ball = container.querySelector(`#sp-ballspielen-${uid}`).checked;
     const pageSize = parseInt(pageSizeSelect.value, 10) || 20;
 
     const filtered = normalized.filter(function (sp) {
@@ -926,7 +925,7 @@ function initApp(data, container) {
     container.querySelector("#" + id).addEventListener("input", resetPageAndRender);
   });
   ["sp-barrierefrei", "sp-ballspielen"].forEach(function (id) {
-    container.querySelector("#" + id).addEventListener("change", resetPageAndRender);
+    container.querySelector("#" + id + "-" + uid).addEventListener("change", resetPageAndRender);
   });
 
   pageSizeSelect.addEventListener("change", resetPageAndRender);
