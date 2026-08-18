@@ -102,8 +102,8 @@ Konfiguration wird bei lokaler Entwicklung aus [odas-config/config.json](odas-co
 
 ## Technische Hinweise
 
-- Datenabruf über lokalen Proxy-Endpunkt /odp-data?path=...
-- Der path-Parameter wird URL-kodiert übertragen
+- Datenabruf erfolgt direkt aus dem Browser gegen die konfigurierte `apiurl`.
+- Die konfigurierte Datenquelle muss CORS freigeben.
 
 ---
 
@@ -112,14 +112,13 @@ Konfiguration wird bei lokaler Entwicklung aus [odas-config/config.json](odas-co
 Die App kann lokal, eigenstaendig hinter einem Traefik-Reverse-Proxy oder ueber den ODAS
 betrieben werden.
 
-### Datenabruf: `proxyAktiv`
+### Datenabruf: kein `proxyAktiv`-Schalter
 
-| Wert   | Bedeutung                                                                   |
-| ------ | --------------------------------------------------------------------------- |
-| `nein` | Direkter Abruf der Daten-URL. Standard fuer Entwicklung und Standalone.      |
-| `ja`   | Abruf ueber den ODAS-Proxy `…/odp-data`. Nur im ODAS-Live-System verfuegbar. |
-
-Bei `nein` muss die Datenquelle CORS freigeben.
+Der ODAS-Proxy wird derzeit umgebaut und funktioniert nach der aktuellen Host-Regel nicht
+mit einer Fremdquelle wie `www.berlin.de` (der Host liegt ausserhalb des betreibenden ODP,
+jeder `…/odp-data`-Aufruf scheitert mit HTTP 500 ohne Fallback). Das Umschaltfeld
+`proxyAktiv` wird deshalb bewusst **nicht angeboten**; die App laedt ausschliesslich direkt
+und setzt eine CORS-freigegebene Datenquelle voraus.
 
 ### Standalone-Betrieb
 
@@ -128,8 +127,7 @@ dem EntryPoint `websecure` und dem Zertifikatsresolver `letsencrypt`.
 
 1. In `docker-compose.standalone.yml` den Platzhalter `app1.example.com` durch den
    echten FQDN ersetzen.
-2. In `odas-config/config.json` `proxyAktiv` auf `nein` belassen.
-3. Starten:
+2. Starten:
 
 ```bash
 STANDALONE=true make up

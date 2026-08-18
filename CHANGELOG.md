@@ -1,6 +1,9 @@
 # Changelog
 
 
+## 1.21.0 - 2026-08-18
+- `proxyAktiv`-Schalter entfernt (`app-package.json`, `odas-config/config.json`): Der ODAS-Proxy wird umgebaut und funktioniert nach der aktuellen Host-Regel nicht mit `www.berlin.de`; das Feld wird bis zum Abschluss des Umbaus bewusst nicht angeboten. Die App lief bereits im Direktmodus (`proxyAktiv: "nein"`), das Verhalten ändert sich nicht.
+
 ## 1.20.0 - 2026-08-17
 - `fetchOdasJson()` wirft jetzt bei nicht-JSON-Antworten (CSV, HTML, leerer Body) eine sprechende Konfigurationsfehlermeldung statt der rohen `JSON.parse`-Parserfehlermeldung (F-66)
 - `urlDaten` zeigte auf einen nicht mehr existierenden Host (`offenedaten.esslingen.de`/`open-data-esslingen.de`, NXDOMAIN) bzw. auf den Platzhalter `.../testdaten` (HTTP 404) — jetzt auf die reale Datensatz-Landingpage der tatsächlich konfigurierten `apiurl`-Quelle verweisend, live per HTTP-Abruf verifiziert (F-67)
