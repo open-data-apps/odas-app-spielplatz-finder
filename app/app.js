@@ -291,15 +291,13 @@ function app(configdata = {}, enclosingHtmlDivElement) {
   const rawApiUrl =
     typeof configdata.apiurl === "string" ? configdata.apiurl.trim() : "";
   if (!rawApiUrl) {
-    showLoadError("Konfiguration fehlt: apiurl ist leer");
+    showConfigInfo("Es ist keine Datenquelle konfiguriert.");
     return null;
   }
 
   const apiUrl = normalizeApiUrl(rawApiUrl);
   if (!apiUrl) {
-    showLoadError(
-      "Konfiguration ungültig: apiurl enthält einen Platzhalter (...)",
-    );
+    showConfigInfo("Es ist keine Datenquelle konfiguriert.");
     return null;
   }
 
@@ -312,6 +310,10 @@ function app(configdata = {}, enclosingHtmlDivElement) {
         if (dsEl) dsEl.innerHTML = '<div class="text-muted small mb-2">Datenstand: ' + escapeHtml(state.datenStand) + '</div>';
       }
       const spielplaetze = parseCSV(csvText);
+      if (spielplaetze.length === 0) {
+        showEmptyDataInfo("Keine Daten in der Datenquelle gefunden.");
+        return;
+      }
       waitForLeafletThenInit(spielplaetze, enclosingHtmlDivElement, spUid);
     })
     .catch(function (err) {
@@ -321,10 +323,28 @@ function app(configdata = {}, enclosingHtmlDivElement) {
 
   return null;
 
+  function showConfigInfo(message) {
+    enclosingHtmlDivElement.querySelector("#sp-tbody").innerHTML =
+      `<tr><td colspan="7" class="text-center p-3">
+         <div class="alert alert-info mb-0" role="alert">${escapeHtml(message)}</div>
+       </td></tr>`;
+    const s = enclosingHtmlDivElement.querySelector("#sp-data-spinner");
+    if (s) s.style.display = "none";
+  }
+
+  function showEmptyDataInfo(message) {
+    enclosingHtmlDivElement.querySelector("#sp-tbody").innerHTML =
+      `<tr><td colspan="7" class="text-center p-3">
+         <div class="alert alert-info mb-0" role="alert">${escapeHtml(message)}</div>
+       </td></tr>`;
+    const s = enclosingHtmlDivElement.querySelector("#sp-data-spinner");
+    if (s) s.style.display = "none";
+  }
+
   function showLoadError(message) {
     enclosingHtmlDivElement.querySelector("#sp-tbody").innerHTML =
-      `<tr><td colspan="7" class="text-danger text-center">
-         Fehler beim Laden der Daten: ${message}
+      `<tr><td colspan="7" class="text-center p-3">
+         <div class="alert alert-danger mb-0" role="alert"><strong>Fehler beim Laden der Daten:</strong> ${escapeHtml(message)}</div>
        </td></tr>`;
     const s = enclosingHtmlDivElement.querySelector("#sp-data-spinner");
     if (s) s.style.display = "none";
