@@ -1,6 +1,9 @@
 # Changelog
 
 
+## 1.22.0 - 2026-08-20
+- FIX: Dispose-/Race-Guard ergänzt — bislang fehlte jeglicher Schutz gegen überholte asynchrone Fortsetzungen (F-70)
+
 ## 1.21.0 - 2026-08-18
 - `proxyAktiv`-Schalter entfernt (`app-package.json`, `odas-config/config.json`): Der ODAS-Proxy wird umgebaut und funktioniert nach der aktuellen Host-Regel nicht mit `www.berlin.de`; das Feld wird bis zum Abschluss des Umbaus bewusst nicht angeboten. Die App lief bereits im Direktmodus (`proxyAktiv: "nein"`), das Verhalten ändert sich nicht.
 

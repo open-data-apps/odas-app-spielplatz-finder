@@ -159,7 +159,10 @@ function describeNonJsonPayload(rawContent) {
   return "unlesbaren Inhalt";
 }
 
-// F-51: Container -> Teardown-Callback.
+// F-51/F-70: Container -> Teardown-Callback. Wird synchron zu Beginn von
+// app() gesetzt (vor jeglicher DOM-/Async-Arbeit) und setzt u. a. das
+// Dispose-Flag der Instanz, damit verspaetete Promise-/setTimeout-
+// Fortsetzungen erkennen, dass ihre Instanz nicht mehr aktiv ist.
 const spTeardowns = new Map();
 
 /* Wird von app/app-base.js zu Beginn von loadPage() aufgerufen. */
@@ -176,7 +179,34 @@ function onPageLeave(page) {
 
 function app(configdata = {}, enclosingHtmlDivElement) {
   const spUid = "i" + ++spInstanzZaehler;
-  const state = { datenStand: null };
+  // F-70: Instanzzustand inkl. Dispose-/Race-Guard. Wird VOR jeglicher DOM-
+  // und Async-Arbeit angelegt und registriert, damit auch ein Seitenwechsel
+  // waehrend des initialen CSV-Ladens oder des Leaflet-Wartens verspaetete
+  // Fortsetzungen wirkungslos macht (statt in den DOM eines abgebauten/
+  // wiederverwendeten Containers zu schreiben).
+  const state = {
+    datenStand: null,
+    disposed: false,
+    map: null,
+    // Monoton wachsender Token: wird bei Dispose erhoeht, um laufende
+    // Geocode-Fortsetzungen als ueberholt zu markieren (Muster wie F-57 in
+    // odas-app-realtimedataview).
+    geocodeToken: 0,
+  };
+  // F-51/F-70: Container -> Abbaufunktion dieser Instanz. Ueberschreibt
+  // synchron jeden evtl. noch vorhandenen Eintrag fuer denselben Container.
+  spTeardowns.set(enclosingHtmlDivElement, function () {
+    state.disposed = true;
+    state.geocodeToken++;
+    if (state.map) {
+      try {
+        state.map.remove();
+      } catch (error) {
+        console.warn("Fehler beim Entfernen der Leaflet-Karte:", error);
+      }
+      state.map = null;
+    }
+  });
   // --- Skeleton sofort rendern ---
   enclosingHtmlDivElement.innerHTML = `
     <div class="d-flex justify-content-between align-items-center mb-3">
@@ -304,6 +334,10 @@ function app(configdata = {}, enclosingHtmlDivElement) {
   // --- Daten laden (nicht-async, via .then()) ---
   fetchSpielplatzCsv(apiUrl, configdata, state)
     .then(function (csvText) {
+      // F-70: Seitenwechsel waehrend des Fetch — abbrechen, bevor irgendetwas
+      // geparst oder in den (evtl. abgebauten/wiederverwendeten) DOM
+      // geschrieben wird.
+      if (state.disposed) return;
       // Schale 4: Datenfrische aus Last-Modified anzeigen
       if (state.datenStand) {
         const dsEl = enclosingHtmlDivElement.querySelector("#sp-datenstand-wrap");
@@ -314,9 +348,10 @@ function app(configdata = {}, enclosingHtmlDivElement) {
         showEmptyDataInfo("Keine Daten in der Datenquelle gefunden.");
         return;
       }
-      waitForLeafletThenInit(spielplaetze, enclosingHtmlDivElement, spUid);
+      waitForLeafletThenInit(spielplaetze, enclosingHtmlDivElement, spUid, state);
     })
     .catch(function (err) {
+      if (state.disposed) return;
       showLoadError(err.message);
       console.error(err);
     });
@@ -396,11 +431,15 @@ function normalizeApiUrl(apiUrl) {
 /* ------------------------------------------------------------------ */
 /*  Warte auf Leaflet, dann App initialisieren                         */
 /* ------------------------------------------------------------------ */
-function waitForLeafletThenInit(data, container, uid) {
+function waitForLeafletThenInit(data, container, uid, state) {
   let tries = 0;
   function check() {
+    // F-70: Instanz kann waehrend des Pollings (Seitenwechsel) abgebaut
+    // worden sein — dann weder initApp() noch weitere DOM-Schreibvorgaenge
+    // ausloesen, und die Poll-Schleife nicht fortsetzen.
+    if (state.disposed) return;
     if (typeof L !== "undefined") {
-      initApp(data, container, uid);
+      initApp(data, container, uid, state);
       return;
     }
     if (tries++ > 80) {
@@ -537,7 +576,7 @@ function isTruthyValue(value) {
 /* ------------------------------------------------------------------ */
 /*  App initialisieren (Karte + Tabelle + Filter)                      */
 /* ------------------------------------------------------------------ */
-function initApp(data, container, uid) {
+function initApp(data, container, uid, state) {
   // Spinner ausblenden
   const spinner = container.querySelector("#sp-data-spinner");
   if (spinner) spinner.style.display = "none";
@@ -587,15 +626,11 @@ function initApp(data, container, uid) {
 
   // Leaflet-Karte
   const map = L.map(container.querySelector("#sp-map")).setView([52.43, 13.32], 12);
-  // F-51: Abbaufunktion dieser Instanz registrieren. Schluessel ist `container` —
-  // diese Funktion laeuft in initApp(), nicht in app().
-  spTeardowns.set(container, function () {
-    try {
-      map.remove();
-    } catch (error) {
-      console.warn("Fehler beim Entfernen der Leaflet-Karte:", error);
-    }
-  });
+  // F-51/F-70: Referenz auf die Karte am Instanzzustand hinterlegen — die in
+  // app() bereits registrierte Abbaufunktion entfernt sie ueber state.map,
+  // sobald die Instanz disposed wird (Seitenwechsel oder Re-Init desselben
+  // Containers).
+  state.map = map;
   L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
     attribution:
       '© <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
@@ -746,6 +781,10 @@ function initApp(data, container, uid) {
     renderScheduled = true;
     setTimeout(function () {
       renderScheduled = false;
+      // F-70: waehrend der gebatchten 0ms-Verzoegerung kann die Instanz
+      // (Seitenwechsel) disposed worden sein — dann nicht mehr auf der
+      // bereits entfernten Leaflet-Karte/DOM rendern.
+      if (state.disposed) return;
       render();
     }, 0);
   }
@@ -776,15 +815,23 @@ function initApp(data, container, uid) {
     if (geocodeCache.has(key) || geocodeInFlight.has(key)) return false;
 
     geocodeInFlight.add(key);
+    // F-70: Token der Instanz zum Zeitpunkt der Anfrage einfrieren. Er wird
+    // bei Dispose erhoeht, sodass eine verspaetet zurueckkommende Anfrage
+    // erkennt, dass ihre Instanz nicht mehr aktiv ist, und weder den Cache
+    // fuellt noch einen Render auf einer bereits entfernten Karte ausloest.
+    const requestToken = state.geocodeToken;
     geocodeAddress(query)
       .then(function (coords) {
+        if (state.geocodeToken !== requestToken) return;
         geocodeCache.set(key, coords);
       })
       .catch(function () {
+        if (state.geocodeToken !== requestToken) return;
         geocodeCache.set(key, null);
       })
       .finally(function () {
         geocodeInFlight.delete(key);
+        if (state.geocodeToken !== requestToken) return;
         scheduleRender();
       });
 
