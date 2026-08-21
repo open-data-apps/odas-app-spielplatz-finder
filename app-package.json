@@ -3,7 +3,7 @@
   "app-entwickler-name": "ondics-gmbh",
   "name-in-url": "Spielplaetze",
   "name": "Spielplätze",
-  "version": "1.23.0",
+  "version": "1.24.0",
   "odas-app-icon": "assets/odas-app-icon.svg",
   "app-icon": "assets/odas-app-icon.svg",
   "kurzbeschreibung": "Karten- und Tabellenansicht von Spielplaetzen mit Filtern auf Basis von Open-Data-CSV.",
@@ -15,7 +15,7 @@
     "",
     "## Methodik",
     "",
-    "Die App lädt die in `apiurl` konfigurierte CSV-Ressource einmalig direkt im Browser – ohne aktive Proxy-Konfiguration – und setzt eine CORS-freigegebene Quelle voraus. Der Abruf erfolgt als einzelner `fetch`-Aufruf gegen die konfigurierte Berlin-Quelle; die Antwort wird als Text verarbeitet und ein vorhandener `Last-Modified`-Header als lokalisiertes Datum (`de-DE`) unter „Datenstand“ angezeigt, sofern die Antwort ihn liefert.",
+    "Die App lädt die in `apiurls.spielplaetze` konfigurierte CSV-Ressource einmalig direkt im Browser – ohne aktive Proxy-Konfiguration – und setzt eine CORS-freigegebene Quelle voraus. Der Abruf erfolgt als einzelner `fetch`-Aufruf gegen die konfigurierte Berlin-Quelle; die Antwort wird als Text verarbeitet und ein vorhandener `Last-Modified`-Header als lokalisiertes Datum (`de-DE`) unter „Datenstand“ angezeigt, sofern die Antwort ihn liefert.",
     "",
     "Das CSV wird quote-sicher geparst: Erkennung des Delimiters (Semikolon `;` vs. Komma `,`) anhand der Header-Zeile, zeilen- und feldweise Trennung innerhalb von Anführungszeichen sowie Escaped-Quotes (`\"\"`) bleiben unberührt. Feldnamen werden alias-normalisiert – z. B. `name`/`bezeichnung`/`adresse`/`strasse` → Name, `ortsteil`/`bezirk` → Ortsteil, `plz`/`postleitzahl` → PLZ, `art`/`spielplatzart`/`anlagenart` → Art, `groesse`/`flaeche`/`größe` → Fläche, `behindertengerecht`/`barrierefrei` → Barrierefrei, `ballspielen`/`bolzen` → Ballspielen, `tischtennis`/`tischtennis_anzahl` → Tischtennis, `schliesszeiten`/`öffnungszeiten` → Zeiten sowie `lat`/`latitude`/`breitengrad`/`ykoord`/`koordy` und `lon`/`longitude`/`laengengrad`/`xkoord`/`koordx` → Koordinaten.",
     "",
@@ -134,7 +134,7 @@
         "",
         "## Methodik",
         "",
-        "Die App lädt die in `apiurl` konfigurierte CSV-Ressource einmalig direkt im Browser – ohne aktive Proxy-Konfiguration – und setzt eine CORS-freigegebene Quelle voraus. Der Abruf erfolgt als einzelner `fetch`-Aufruf gegen die konfigurierte Berlin-Quelle; die Antwort wird als Text verarbeitet und ein vorhandener `Last-Modified`-Header als lokalisiertes Datum (`de-DE`) unter „Datenstand“ angezeigt, sofern die Antwort ihn liefert.",
+        "Die App lädt die in `apiurls.spielplaetze` konfigurierte CSV-Ressource einmalig direkt im Browser – ohne aktive Proxy-Konfiguration – und setzt eine CORS-freigegebene Quelle voraus. Der Abruf erfolgt als einzelner `fetch`-Aufruf gegen die konfigurierte Berlin-Quelle; die Antwort wird als Text verarbeitet und ein vorhandener `Last-Modified`-Header als lokalisiertes Datum (`de-DE`) unter „Datenstand“ angezeigt, sofern die Antwort ihn liefert.",
         "",
         "Das CSV wird quote-sicher geparst: Erkennung des Delimiters (Semikolon `;` vs. Komma `,`) anhand der Header-Zeile, zeilen- und feldweise Trennung innerhalb von Anführungszeichen sowie Escaped-Quotes (`\"\"`) bleiben unberührt. Feldnamen werden alias-normalisiert – z. B. `name`/`bezeichnung`/`adresse`/`strasse` → Name, `ortsteil`/`bezirk` → Ortsteil, `plz`/`postleitzahl` → PLZ, `art`/`spielplatzart`/`anlagenart` → Art, `groesse`/`flaeche`/`größe` → Fläche, `behindertengerecht`/`barrierefrei` → Barrierefrei, `ballspielen`/`bolzen` → Ballspielen, `tischtennis`/`tischtennis_anzahl` → Tischtennis, `schliesszeiten`/`öffnungszeiten` → Zeiten sowie `lat`/`latitude`/`breitengrad`/`ykoord`/`koordy` und `lon`/`longitude`/`laengengrad`/`xkoord`/`koordx` → Koordinaten.",
         "",
@@ -251,17 +251,24 @@
       "default": "(C) Copyright {{jahr}} | App & Daten: {{odp.anbieter.name}} | App-Entwickler: {{app.developer.name}} | ODAS: {{odas.betreiber.name}}",
       "erforderlich": "ja"
     },
-    "apiurl": {
-      "label": "URL zu den Daten",
+    "apiurls": {
+      "label": "URLs zu Datenressourcen",
       "category": "datenherkunft",
-      "hilfe": "Direkte URL zur CSV-Ressource",
+      "hilfe": "Direkter Download-, Datei- oder API-Endpunkt der tatsächlich verwendeten Datenquelle(n). Mehrere Einträge möglich.",
+      "typ": "array",
       "format": {
         "typ": "url",
-        "laenge": 255
+        "laenge": 500
       },
-      "default": "https://www.berlin.de/ba-steglitz-zehlendorf/politik-und-verwaltung/aemter/strassen-und-gruenflaechenamt/gruenflaechen/spiel-und-sportplaetze/simple-search-spielplaetze/index.php/index/all.csv?q=",
-      "beispiel": "https://www.berlin.de/ba-steglitz-zehlendorf/politik-und-verwaltung/aemter/strassen-und-gruenflaechenamt/gruenflaechen/spiel-und-sportplaetze/simple-search-spielplaetze/index.php/index/all.csv?q=",
-      "erforderlich": "ja"
+      "urls": [
+        {
+          "name": "spielplaetze",
+          "label": "URL zu den Daten",
+          "default": "https://www.berlin.de/ba-steglitz-zehlendorf/politik-und-verwaltung/aemter/strassen-und-gruenflaechenamt/gruenflaechen/spiel-und-sportplaetze/simple-search-spielplaetze/index.php/index/all.csv?q=",
+          "beispiel": "https://www.berlin.de/ba-steglitz-zehlendorf/politik-und-verwaltung/aemter/strassen-und-gruenflaechenamt/gruenflaechen/spiel-und-sportplaetze/simple-search-spielplaetze/index.php/index/all.csv?q=",
+          "erforderlich": "ja"
+        }
+      ]
     },
     "sprache": {
       "label": "Sprache der App",

@@ -86,7 +86,7 @@ Konfiguration wird bei lokaler Entwicklung aus [odas-config/config.json](odas-co
 
 | Parameter    | Beschreibung                               | Pflicht |
 | ------------ | ------------------------------------------ | ------- |
-| apiurl       | Direkte URL zur CSV-Ressource              | ja      |
+| apiurls      | URLs zu Datenressourcen. Eintrag `spielplaetze`: direkte URL zur CSV-Ressource | ja (Eintrag `spielplaetze`) |
 | urlDaten     | URL zur Datensatzseite im Open Data Portal | ja      |
 | titel        | Titel in der App-Kopfzeile                 | ja      |
 | seitentitel  | Browser-Tab-Titel                          | ja      |
@@ -102,7 +102,7 @@ Konfiguration wird bei lokaler Entwicklung aus [odas-config/config.json](odas-co
 
 ## Technische Hinweise
 
-- Datenabruf erfolgt direkt aus dem Browser gegen die konfigurierte `apiurl`.
+- Datenabruf erfolgt direkt aus dem Browser gegen die konfigurierte `apiurls.spielplaetze`.
 - Die konfigurierte Datenquelle muss CORS freigeben.
 
 ---

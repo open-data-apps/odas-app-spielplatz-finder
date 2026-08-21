@@ -1,5 +1,5 @@
 /*
- * - @param {Object} configdata             - Konfigurationsdaten, enthält apiurl
+ * - @param {Object} configdata             - Konfigurationsdaten, enthält apiurls
  * - @param {HTMLElement} enclosingHtmlDivElement - Container für den Content
  * - @returns {null}
  */
@@ -135,6 +135,17 @@ async function fetchOdasResource(targetUrl, configdata = {}) {
       `Direkter Datenabruf fehlgeschlagen (${error.message}). Bitte prüfen Sie die Daten-URL und die CORS-Freigabe der Datenquelle.`,
     );
   }
+}
+
+/**
+ * Löst eine benannte Datenressource aus configdata.apiurls auf.
+ * Neue apiurls-Form (typ: "array"); das frühere skalare apiurl wird nicht mehr gelesen.
+ * @returns {string} getrimmte URL, oder "" für den Zustand "keine Quelle konfiguriert"
+ */
+function getOdasApiUrl(configdata, name) {
+  const liste = Array.isArray(configdata && configdata.apiurls) ? configdata.apiurls : [];
+  const treffer = liste.find((eintrag) => eintrag && eintrag.name === name);
+  return String((treffer && treffer.url) || "").trim();
 }
 
 async function fetchOdasJson(targetUrl, configdata = {}) {
@@ -318,8 +329,7 @@ function app(configdata = {}, enclosingHtmlDivElement) {
     if (wel) wel.innerHTML = weitereHtml;
   }
 
-  const rawApiUrl =
-    typeof configdata.apiurl === "string" ? configdata.apiurl.trim() : "";
+  const rawApiUrl = getOdasApiUrl(configdata, "spielplaetze");
   if (!rawApiUrl) {
     showConfigInfo("Es ist keine Datenquelle konfiguriert.");
     return null;
