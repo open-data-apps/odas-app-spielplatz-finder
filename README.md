@@ -112,13 +112,13 @@ Konfiguration wird bei lokaler Entwicklung aus [odas-config/config.json](odas-co
 Die App kann lokal, eigenstaendig hinter einem Traefik-Reverse-Proxy oder ueber den ODAS
 betrieben werden.
 
-### Datenabruf: kein `proxyAktiv`-Schalter
+### Datenabruf: Direktmodus oder ODAS-Proxy (`proxyAktiv`)
 
-Der ODAS-Proxy wird derzeit umgebaut und funktioniert nach der aktuellen Host-Regel nicht
-mit einer Fremdquelle wie `www.berlin.de` (der Host liegt ausserhalb des betreibenden ODP,
-jeder `…/odp-data`-Aufruf scheitert mit HTTP 500 ohne Fallback). Das Umschaltfeld
-`proxyAktiv` wird deshalb bewusst **nicht angeboten**; die App laedt ausschliesslich direkt
-und setzt eine CORS-freigegebene Datenquelle voraus.
+Die App laedt die Datenquelle standardmaessig **direkt** im Browser und setzt dabei eine
+CORS-freigegebene Quelle voraus. Ueber den Konfigurationsschalter `proxyAktiv` kann je
+Instanz auf den ODAS-Proxy umgeschaltet werden; seit dem Plattform-Update vom 2026-08-24
+erlaubt der Proxy Datenabrufe fuer jede Quelle-Origin, die in den konfigurierten
+`apiurls` steht — also auch fuer die Fremdquelle `www.berlin.de`.
 
 ### Standalone-Betrieb
 

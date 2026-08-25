@@ -3,7 +3,7 @@
   "app-entwickler-name": "ondics-gmbh",
   "name-in-url": "Spielplaetze",
   "name": "Spielplätze",
-  "app-version": "1.26.0",
+  "app-version": "1.27.0",
   "app-package-version": "2",
   "odas-app-icon": "assets/odas-app-icon.svg",
   "app-icon": "assets/odas-app-icon.svg",
@@ -16,7 +16,7 @@
     "",
     "## Methodik",
     "",
-    "Die App lädt die in `apiurls.spielplaetze` konfigurierte CSV-Ressource einmalig direkt im Browser – ohne aktive Proxy-Konfiguration – und setzt eine CORS-freigegebene Quelle voraus. Der Abruf erfolgt als einzelner `fetch`-Aufruf gegen die konfigurierte Berlin-Quelle; die Antwort wird als Text verarbeitet und ein vorhandener `Last-Modified`-Header als lokalisiertes Datum (`de-DE`) unter „Datenstand“ angezeigt, sofern die Antwort ihn liefert.",
+    "Die App lädt die in `apiurls.spielplaetze` konfigurierte CSV-Ressource einmalig im Browser; Standard ist der Direktabruf, alternativ der ODAS-Proxy (`proxyAktiv: ja`, nur im ODAS-Live-System verfügbar). Im Direktmodus wird eine CORS-freigegebene Quelle vorausgesetzt. Der Abruf erfolgt als einzelner `fetch`-Aufruf gegen die konfigurierte Berlin-Quelle; die Antwort wird als Text verarbeitet und ein vorhandener `Last-Modified`-Header als lokalisiertes Datum (`de-DE`) unter „Datenstand“ angezeigt, sofern die Antwort ihn liefert.",
     "",
     "Das CSV wird quote-sicher geparst: Erkennung des Delimiters (Semikolon `;` vs. Komma `,`) anhand der Header-Zeile, zeilen- und feldweise Trennung innerhalb von Anführungszeichen sowie Escaped-Quotes (`\"\"`) bleiben unberührt. Feldnamen werden alias-normalisiert – z. B. `name`/`bezeichnung`/`adresse`/`strasse` → Name, `ortsteil`/`bezirk` → Ortsteil, `plz`/`postleitzahl` → PLZ, `art`/`spielplatzart`/`anlagenart` → Art, `groesse`/`flaeche`/`größe` → Fläche, `behindertengerecht`/`barrierefrei` → Barrierefrei, `ballspielen`/`bolzen` → Ballspielen, `tischtennis`/`tischtennis_anzahl` → Tischtennis, `schliesszeiten`/`öffnungszeiten` → Zeiten sowie `lat`/`latitude`/`breitengrad`/`ykoord`/`koordy` und `lon`/`longitude`/`laengengrad`/`xkoord`/`koordx` → Koordinaten.",
     "",
@@ -135,7 +135,7 @@
         "",
         "## Methodik",
         "",
-        "Die App lädt die in `apiurls.spielplaetze` konfigurierte CSV-Ressource einmalig direkt im Browser – ohne aktive Proxy-Konfiguration – und setzt eine CORS-freigegebene Quelle voraus. Der Abruf erfolgt als einzelner `fetch`-Aufruf gegen die konfigurierte Berlin-Quelle; die Antwort wird als Text verarbeitet und ein vorhandener `Last-Modified`-Header als lokalisiertes Datum (`de-DE`) unter „Datenstand“ angezeigt, sofern die Antwort ihn liefert.",
+        "Die App lädt die in `apiurls.spielplaetze` konfigurierte CSV-Ressource einmalig im Browser; Standard ist der Direktabruf, alternativ der ODAS-Proxy (`proxyAktiv: ja`, nur im ODAS-Live-System verfügbar). Im Direktmodus wird eine CORS-freigegebene Quelle vorausgesetzt. Der Abruf erfolgt als einzelner `fetch`-Aufruf gegen die konfigurierte Berlin-Quelle; die Antwort wird als Text verarbeitet und ein vorhandener `Last-Modified`-Header als lokalisiertes Datum (`de-DE`) unter „Datenstand“ angezeigt, sofern die Antwort ihn liefert.",
         "",
         "Das CSV wird quote-sicher geparst: Erkennung des Delimiters (Semikolon `;` vs. Komma `,`) anhand der Header-Zeile, zeilen- und feldweise Trennung innerhalb von Anführungszeichen sowie Escaped-Quotes (`\"\"`) bleiben unberührt. Feldnamen werden alias-normalisiert – z. B. `name`/`bezeichnung`/`adresse`/`strasse` → Name, `ortsteil`/`bezirk` → Ortsteil, `plz`/`postleitzahl` → PLZ, `art`/`spielplatzart`/`anlagenart` → Art, `groesse`/`flaeche`/`größe` → Fläche, `behindertengerecht`/`barrierefrei` → Barrierefrei, `ballspielen`/`bolzen` → Ballspielen, `tischtennis`/`tischtennis_anzahl` → Tischtennis, `schliesszeiten`/`öffnungszeiten` → Zeiten sowie `lat`/`latitude`/`breitengrad`/`ykoord`/`koordy` und `lon`/`longitude`/`laengengrad`/`xkoord`/`koordx` → Koordinaten.",
         "",
@@ -209,7 +209,7 @@
         "",
         "Alle für die Darstellung benötigten Programmbibliotheken werden mit der App ausgeliefert. Beim Aufruf werden dafür keine externen Server kontaktiert.",
         "",
-        "Die angezeigten Daten werden vom Browser direkt aus der konfigurierten Datenquelle geladen. Dabei werden technisch bedingt IP-Adresse und Browserkennung an deren Betreiber übermittelt.",
+        "Die angezeigten Daten werden vom Browser direkt aus der konfigurierten Datenquelle geladen. Dabei werden technisch bedingt IP-Adresse und Browserkennung an deren Betreiber übermittelt. Bei aktiviertem ODAS-Proxy (`proxyAktiv: ja`) werden Anfragen stattdessen über den Server des App-Stores geleitet.",
         "",
         "### Beim Aufruf kontaktierte Drittanbieter",
         "",
@@ -270,6 +270,17 @@
           "erforderlich": "ja"
         }
       ]
+    },
+    "proxyAktiv": {
+      "label": "ODAS-Proxy aktivieren",
+      "category": "datenherkunft",
+      "hilfe": "Mit ja werden Datenabrufe über den ODAS-Proxy gesendet. Möglich, wenn die Quelle-Origin in den konfigurierten apiurls steht. Der Proxy selbst ist nur im ODAS-Live-System verfügbar; Entwicklung und Standalone verwenden nein.",
+      "default": "nein",
+      "format": {
+        "typ": "dropdown",
+        "optionen": ["nein", "ja"]
+      },
+      "erforderlich": "ja"
     },
     "sprache": {
       "label": "Sprache der App",

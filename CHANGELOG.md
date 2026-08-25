@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.27.0 - 2026-08-25
+- **CHG:** `proxyAktiv`-Schalter wiedereingeführt (Default `nein`). Der ODAS-Proxy erlaubt seit Plattform-Update 2026-08-24 Datenabrufe für jede in den `apiurls` konfigurierte Quelle-Origin.
+
+
 ## 1.26.0 - 2026-08-25
 - **CHG:** Proxy-Aufruf sendet die vollständige Ziel-URL statt nur Pfad+Query, damit die neue Origin-Allowlist-Prüfung der ODAS-Plattform greift (bisher implizite Auflösung gegen den ersten konfigurierten `apiurl`).
 - **FIX:** Tote Anbieter-Shortcodes in Kontakt/Impressum ersetzt (`{{odp.anbieter.url-extern}}` → `{{odp.anbieter.url}}`, `tel:{{odp.anbieter.telcode}}` → `tel:{{odp.anbieter.tel}}`).
