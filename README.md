@@ -114,8 +114,7 @@ betrieben werden.
 
 ### Datenabruf: Direktmodus oder ODAS-Proxy (`proxyAktiv`)
 
-Die App laedt die Datenquelle standardmaessig **direkt** im Browser und setzt dabei eine
-CORS-freigegebene Quelle voraus. Ueber den Konfigurationsschalter `proxyAktiv` kann je
+Die App laedt die Datenquelle standardmaessig **ueber den ODAS-Proxy** (`proxyAktiv: ja`), da die konfigurierte Quelle (`www.berlin.de`) keinen CORS-Header sendet. Nur mit einer CORS-freigegebenen Quelle kann auf Direktabruf (`proxyAktiv: nein`) umgestellt werden. Ueber den Konfigurationsschalter `proxyAktiv` kann je
 Instanz auf den ODAS-Proxy umgeschaltet werden; seit dem Plattform-Update vom 2026-08-24
 erlaubt der Proxy Datenabrufe fuer jede Quelle-Origin, die in den konfigurierten
 `apiurls` steht — also auch fuer die Fremdquelle `www.berlin.de`.

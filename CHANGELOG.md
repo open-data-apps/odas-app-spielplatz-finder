@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.28.0 - 2026-08-27
+- **CHG:** `proxyAktiv` Default auf `ja` (www.berlin.de ohne CORS, Live-Audit 2026-08-27: ja ✅138 / nein ❌Failed to fetch).
+
 ## 1.27.0 - 2026-08-25
 - **CHG:** `proxyAktiv`-Schalter wiedereingeführt (Default `nein`). Der ODAS-Proxy erlaubt seit Plattform-Update 2026-08-24 Datenabrufe für jede in den `apiurls` konfigurierte Quelle-Origin.
 

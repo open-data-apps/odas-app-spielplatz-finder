@@ -44,7 +44,7 @@
     "App-Entwickler: Ondics GmbH | ",
     "Provided by: Ondics GmbH"
   ],
-  "proxyAktiv": "nein",
+  "proxyAktiv": "ja",
   "apiurls": [
     {
       "name": "spielplaetze",
