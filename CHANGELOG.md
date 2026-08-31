@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.29.0 - 2026-09-01
+- **FIX:** B3-Datenschutz auf `proxyAktiv: ja` korrigiert (`über den ODAS-Proxy geladen`) in `app-package.json`/`odas-config/config.json` — `doku-check` B3 grün.
+
 ## 1.28.0 - 2026-08-27
 - **CHG:** `proxyAktiv` Default auf `ja` (www.berlin.de ohne CORS, Live-Audit 2026-08-27: ja ✅138 / nein ❌Failed to fetch).
 
