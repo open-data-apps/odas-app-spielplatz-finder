@@ -224,25 +224,25 @@ function app(configdata = {}, enclosingHtmlDivElement) {
       </h2>
       <small class="text-muted">Steglitz-Zehlendorf · Berlin Open Data</small>
     </div>
-    <div id="sp-datenstand-wrap"></div>
+    <div id="sp-datenstand-wrap-${spUid}"></div>
 
     <div class="card mb-3 border-0 bg-light">
       <div class="card-body py-2">
         <div class="row g-2 align-items-end">
           <div class="col-12 col-md-4">
             <label class="form-label mb-1 small fw-semibold">Suche (Name / Adresse)</label>
-            <input type="text" id="sp-search" class="form-control form-control-sm"
+            <input type="text" id="sp-search-${spUid}" class="form-control form-control-sm"
                    placeholder="z. B. Schloßpark …">
           </div>
           <div class="col-6 col-md-2">
             <label class="form-label mb-1 small fw-semibold">Ortsteil</label>
-            <select id="sp-ortsteil" class="form-select form-select-sm">
+            <select id="sp-ortsteil-${spUid}" class="form-select form-select-sm">
               <option value="">Alle</option>
             </select>
           </div>
           <div class="col-6 col-md-2">
             <label class="form-label mb-1 small fw-semibold">Art</label>
-            <select id="sp-art" class="form-select form-select-sm">
+            <select id="sp-art-${spUid}" class="form-select form-select-sm">
               <option value="">Alle</option>
             </select>
           </div>
@@ -262,11 +262,11 @@ function app(configdata = {}, enclosingHtmlDivElement) {
       </div>
     </div>
 
-    <div id="sp-map" style="height:380px; border-radius:8px; margin-bottom:.5rem;"></div>
-    <p id="sp-map-status" class="text-muted small mb-3">Karte wird vorbereitet …</p>
+    <div id="sp-map-${spUid}" style="height:380px; border-radius:8px; margin-bottom:.5rem;"></div>
+    <p id="sp-map-status-${spUid}" class="text-muted small mb-3">Karte wird vorbereitet …</p>
 
-    <p id="sp-count" class="text-muted small mb-2">
-      <span id="sp-data-spinner" style="vertical-align:middle;">
+    <p id="sp-count-${spUid}" class="text-muted small mb-2">
+      <span id="sp-data-spinner-${spUid}" style="vertical-align:middle;">
         <span class="spinner-border text-primary spinner-border-sm" role="status"
               style="width:1.2rem;height:1.2rem;">
           <span class="visually-hidden">Laden...</span>
@@ -288,7 +288,7 @@ function app(configdata = {}, enclosingHtmlDivElement) {
             <th>♿</th>
           </tr>
         </thead>
-        <tbody id="sp-tbody">
+        <tbody id="sp-tbody-${spUid}">
           <tr><td colspan="7" class="text-center">
             <div class="spinner-border spinner-border-sm text-secondary me-2"></div>
             Daten werden geladen …
@@ -298,7 +298,7 @@ function app(configdata = {}, enclosingHtmlDivElement) {
     </div>
 
     <div class="d-flex flex-wrap gap-2 justify-content-between align-items-center mt-2">
-      <div id="sp-page-info" class="small text-muted"></div>
+      <div id="sp-page-info-${spUid}" class="small text-muted"></div>
       <div class="d-flex align-items-center gap-2">
         <label for="sp-page-size-${spUid}" class="small text-muted mb-0">Pro Seite</label>
         <select id="sp-page-size-${spUid}" class="form-select form-select-sm" style="width:auto;">
@@ -306,24 +306,24 @@ function app(configdata = {}, enclosingHtmlDivElement) {
           <option value="20" selected>20</option>
           <option value="50">50</option>
         </select>
-        <button id="sp-prev" type="button" class="btn btn-outline-secondary btn-sm">Zurück</button>
-        <button id="sp-next" type="button" class="btn btn-outline-secondary btn-sm">Weiter</button>
+        <button id="sp-prev-${spUid}" type="button" class="btn btn-outline-secondary btn-sm">Zurück</button>
+        <button id="sp-next-${spUid}" type="button" class="btn btn-outline-secondary btn-sm">Weiter</button>
       </div>
     </div>
-    <div id="sp-methodik-wrap"></div>
-    <div id="sp-weitere-infos-wrap"></div>
+    <div id="sp-methodik-wrap-${spUid}"></div>
+    <div id="sp-weitere-infos-wrap-${spUid}"></div>
   `;
 
   const methodikHtml = renderMethodikbox(configdata, spUid);
   if (methodikHtml) {
-    const mel = enclosingHtmlDivElement.querySelector("#sp-methodik-wrap");
+    const mel = enclosingHtmlDivElement.querySelector(`#sp-methodik-wrap-${spUid}`);
     if (mel) mel.innerHTML = methodikHtml;
   }
 
   // Schale 4: Weitere Informationen sofort rendern
   const weitereHtml = renderWeitereInfos(configdata, spUid);
   if (weitereHtml) {
-    const wel = enclosingHtmlDivElement.querySelector("#sp-weitere-infos-wrap");
+    const wel = enclosingHtmlDivElement.querySelector(`#sp-weitere-infos-wrap-${spUid}`);
     if (wel) wel.innerHTML = weitereHtml;
   }
 
@@ -348,7 +348,7 @@ function app(configdata = {}, enclosingHtmlDivElement) {
       if (state.disposed) return;
       // Schale 4: Datenfrische aus Last-Modified anzeigen
       if (state.datenStand) {
-        const dsEl = enclosingHtmlDivElement.querySelector("#sp-datenstand-wrap");
+        const dsEl = enclosingHtmlDivElement.querySelector(`#sp-datenstand-wrap-${spUid}`);
         if (dsEl) dsEl.innerHTML = '<div class="text-muted small mb-2">Datenstand: ' + escapeHtml(state.datenStand) + '</div>';
       }
       const spielplaetze = parseCSV(csvText);
@@ -367,29 +367,29 @@ function app(configdata = {}, enclosingHtmlDivElement) {
   return null;
 
   function showConfigInfo(message) {
-    enclosingHtmlDivElement.querySelector("#sp-tbody").innerHTML =
+    enclosingHtmlDivElement.querySelector(`#sp-tbody-${spUid}`).innerHTML =
       `<tr><td colspan="7" class="text-center p-3">
          <div class="alert alert-info mb-0" role="alert">${escapeHtml(message)}</div>
        </td></tr>`;
-    const s = enclosingHtmlDivElement.querySelector("#sp-data-spinner");
+    const s = enclosingHtmlDivElement.querySelector(`#sp-data-spinner-${spUid}`);
     if (s) s.style.display = "none";
   }
 
   function showEmptyDataInfo(message) {
-    enclosingHtmlDivElement.querySelector("#sp-tbody").innerHTML =
+    enclosingHtmlDivElement.querySelector(`#sp-tbody-${spUid}`).innerHTML =
       `<tr><td colspan="7" class="text-center p-3">
          <div class="alert alert-info mb-0" role="alert">${escapeHtml(message)}</div>
        </td></tr>`;
-    const s = enclosingHtmlDivElement.querySelector("#sp-data-spinner");
+    const s = enclosingHtmlDivElement.querySelector(`#sp-data-spinner-${spUid}`);
     if (s) s.style.display = "none";
   }
 
   function showLoadError(message) {
-    enclosingHtmlDivElement.querySelector("#sp-tbody").innerHTML =
+    enclosingHtmlDivElement.querySelector(`#sp-tbody-${spUid}`).innerHTML =
       `<tr><td colspan="7" class="text-center p-3">
          <div class="alert alert-danger mb-0" role="alert"><strong>Fehler beim Laden der Daten:</strong> ${escapeHtml(message)}</div>
        </td></tr>`;
-    const s = enclosingHtmlDivElement.querySelector("#sp-data-spinner");
+    const s = enclosingHtmlDivElement.querySelector(`#sp-data-spinner-${spUid}`);
     if (s) s.style.display = "none";
   }
 }
@@ -451,7 +451,7 @@ function waitForLeafletThenInit(data, container, uid, state) {
       return;
     }
     if (tries++ > 80) {
-      container.querySelector("#sp-tbody").innerHTML =
+      container.querySelector(`#sp-tbody-${uid}`).innerHTML =
         `<tr><td colspan="9" class="text-danger text-center">
            Leaflet konnte nicht geladen werden.
          </td></tr>`;
@@ -586,7 +586,7 @@ function isTruthyValue(value) {
 /* ------------------------------------------------------------------ */
 function initApp(data, container, uid, state) {
   // Spinner ausblenden
-  const spinner = container.querySelector("#sp-data-spinner");
+  const spinner = container.querySelector(`#sp-data-spinner-${uid}`);
   if (spinner) spinner.style.display = "none";
 
   // Felder normalisieren
@@ -633,7 +633,7 @@ function initApp(data, container, uid, state) {
   });
 
   // Leaflet-Karte
-  const map = L.map(container.querySelector("#sp-map")).setView([52.43, 13.32], 12);
+  const map = L.map(container.querySelector(`#sp-map-${uid}`)).setView([52.43, 13.32], 12);
   // F-51/F-70: Referenz auf die Karte am Instanzzustand hinterlegen — die in
   // app() bereits registrierte Abbaufunktion entfernt sie ueber state.map,
   // sobald die Instanz disposed wird (Seitenwechsel oder Re-Init desselben
@@ -645,7 +645,7 @@ function initApp(data, container, uid, state) {
     maxZoom: 19,
   }).addTo(map);
   const markerLayer = L.layerGroup().addTo(map);
-  const mapStatus = container.querySelector("#sp-map-status");
+  const mapStatus = container.querySelector(`#sp-map-status-${uid}`);
 
   const geocodeCache = new Map();
   const geocodeInFlight = new Set();
@@ -657,9 +657,9 @@ function initApp(data, container, uid, state) {
   let currentPage = 1;
 
   const pageSizeSelect = container.querySelector(`#sp-page-size-${uid}`);
-  const pageInfo = container.querySelector("#sp-page-info");
-  const prevBtn = container.querySelector("#sp-prev");
-  const nextBtn = container.querySelector("#sp-next");
+  const pageInfo = container.querySelector(`#sp-page-info-${uid}`);
+  const prevBtn = container.querySelector(`#sp-prev-${uid}`);
+  const nextBtn = container.querySelector(`#sp-next-${uid}`);
 
   // Dropdowns befüllen
   const ortsteile = [
@@ -681,8 +681,8 @@ function initApp(data, container, uid, state) {
     ),
   ].sort();
 
-  const selOrt = container.querySelector("#sp-ortsteil");
-  const selArt = container.querySelector("#sp-art");
+  const selOrt = container.querySelector(`#sp-ortsteil-${uid}`);
+  const selArt = container.querySelector(`#sp-art-${uid}`);
   ortsteile.forEach(function (o) {
     selOrt.innerHTML += `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`;
   });
@@ -722,7 +722,7 @@ function initApp(data, container, uid, state) {
   }
 
   function highlightSelectedRow() {
-    const tbody = container.querySelector("#sp-tbody");
+    const tbody = container.querySelector(`#sp-tbody-${uid}`);
     tbody.querySelectorAll("tr[data-row-key]").forEach(function (rowEl) {
       const rowKey = decodeURIComponent(
         rowEl.getAttribute("data-row-key") || "",
@@ -929,7 +929,7 @@ function initApp(data, container, uid, state) {
 
   // Render-Funktion
   function render() {
-    const q = container.querySelector("#sp-search").value.toLowerCase();
+    const q = container.querySelector(`#sp-search-${uid}`).value.toLowerCase();
     const ort = selOrt.value;
     const art = selArt.value;
     const barrier = container.querySelector(`#sp-barrierefrei-${uid}`).checked;
@@ -954,7 +954,7 @@ function initApp(data, container, uid, state) {
     const paged = filtered.slice(pageStart, pageStart + pageSize);
 
     // Zähler
-    container.querySelector("#sp-count").textContent =
+    container.querySelector(`#sp-count-${uid}`).textContent =
       filtered.length +
       " Spielplatz" +
       (filtered.length !== 1 ? "plätze" : "") +
@@ -967,7 +967,7 @@ function initApp(data, container, uid, state) {
     nextBtn.disabled = currentPage >= totalPages;
 
     // Tabelle
-    const tbody = container.querySelector("#sp-tbody");
+    const tbody = container.querySelector(`#sp-tbody-${uid}`);
     latestRowsByKey = new Map(
       paged.map(function (sp) {
         return [getRowKey(sp), sp];
@@ -1023,7 +1023,7 @@ function initApp(data, container, uid, state) {
 
   pageSizeSelect.addEventListener("change", resetPageAndRender);
   container
-    .querySelector("#sp-tbody")
+    .querySelector(`#sp-tbody-${uid}`)
     .addEventListener("click", function (event) {
       const rowEl = event.target.closest("tr[data-row-key]");
       if (!rowEl) return;

@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.30.0 - 2026-09-01
+- **FIX:** 14 Container-IDs ohne Uid gescoped (`sp-search`, `sp-ortsteil`, `sp-art`, `sp-map`, `sp-map-status`, `sp-count`, `sp-data-spinner`, `sp-tbody`, `sp-page-info`, `sp-prev`/`next`, `sp-datenstand-wrap`, `sp-methodik-wrap`, `sp-weitere-infos-wrap` → `-${spUid}`/`-${uid}`) — `probe --all` jetzt `0 sonstige Duplikate` statt `HINWEIS 14` (F-71-Rest, gelb → grün).
+
 ## 1.29.0 - 2026-09-01
 - **FIX:** B3-Datenschutz auf `proxyAktiv: ja` korrigiert (`über den ODAS-Proxy geladen`) in `app-package.json`/`odas-config/config.json` — `doku-check` B3 grün.
 
