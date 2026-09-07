@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.30.1 - 2026-09-07
+- **FIX:** Frictionless-Härtung: `assets/schema.json` mit `$schema`, Titeln und ehrlichen Typen (Koordinaten `number`, Anzahl `integer`); `daten.beispiel`/`beispiel-url` und `urlDaten` befüllt. URL bleibt unverändert (Berlin-Server antwortet auf Parameter-Anhang mit 404 — dokumentierte Ausnahme, Schema beschreibt die normalisierte Form).
+
 ## 1.30.0 - 2026-09-01
 - **FIX:** 14 Container-IDs ohne Uid gescoped (`sp-search`, `sp-ortsteil`, `sp-art`, `sp-map`, `sp-map-status`, `sp-count`, `sp-data-spinner`, `sp-tbody`, `sp-page-info`, `sp-prev`/`next`, `sp-datenstand-wrap`, `sp-methodik-wrap`, `sp-weitere-infos-wrap` → `-${spUid}`/`-${uid}`) — `probe --all` jetzt `0 sonstige Duplikate` statt `HINWEIS 14` (F-71-Rest, gelb → grün).
 

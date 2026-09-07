@@ -1,86 +1,96 @@
 {
   "$schema": "https://frictionlessdata.io/schemas/table-schema.json",
   "name": "odas-app-spielplatz-finder",
-  "title": "Spielplätze",
+  "title": "Spielplatz-Finder",
   "fields": [
     {
       "name": "ortsteil",
+      "title": "Ortsteil",
       "type": "string",
-      "description": "Wird in der App verwendet",
+      "description": "Ortsteil des Spielplatzes.",
       "constraints": {
-        "required": true
+        "required": false
       }
     },
     {
       "name": "art",
+      "title": "Art",
       "type": "string",
-      "description": "Wird in der App verwendet",
+      "description": "Art des Spielplatzes (normalisiert aus spielplatzart), z. B. Kleinkinderspielplatz.",
       "constraints": {
-        "required": true
+        "required": false
       }
     },
     {
       "name": "tischtennis_anzahl",
-      "type": "string",
-      "description": "Wird in der App verwendet",
+      "title": "Tischtennis-Anzahl",
+      "type": "integer",
+      "description": "Zahl der Tischtennisplatten (leer, wenn keine vorhanden).",
       "constraints": {
-        "required": true
+        "required": false
       }
     },
     {
       "name": "tischtennis",
+      "title": "Tischtennis",
       "type": "string",
-      "description": "Wird in der App verwendet",
+      "description": "Tischtennisangebot („Ja“ oder leer).",
       "constraints": {
-        "required": true
+        "required": false
       }
     },
     {
       "name": "lat",
-      "type": "string",
-      "description": "Wird in der App verwendet",
+      "title": "Breite",
+      "type": "number",
+      "description": "Breitengrad aus Geokodierung zur Laufzeit.",
       "constraints": {
-        "required": true
+        "required": false
       }
     },
     {
       "name": "lon",
-      "type": "string",
-      "description": "Wird in der App verwendet",
+      "title": "Länge",
+      "type": "number",
+      "description": "Längengrad aus Geokodierung zur Laufzeit.",
       "constraints": {
-        "required": true
+        "required": false
       }
     },
     {
       "name": "latitude",
-      "type": "string",
-      "description": "Wird in der App verwendet",
+      "title": "Breitengrad",
+      "type": "number",
+      "description": "Breitengrad (Alias aus Quellformaten).",
       "constraints": {
-        "required": true
+        "required": false
       }
     },
     {
       "name": "longitude",
-      "type": "string",
-      "description": "Wird in der App verwendet",
+      "title": "Längengrad",
+      "type": "number",
+      "description": "Längengrad (Alias aus Quellformaten).",
       "constraints": {
-        "required": true
+        "required": false
       }
     },
     {
       "name": "spielplatz_name",
+      "title": "Spielplatz-Name",
       "type": "string",
-      "description": "Wird in der App verwendet",
+      "description": "Name des Spielplatzes (normalisiert aus name).",
       "constraints": {
-        "required": true
+        "required": false
       }
     },
     {
       "name": "adresse",
+      "title": "Adresse",
       "type": "string",
-      "description": "Wird in der App verwendet",
+      "description": "Adresse (normalisiert aus strasse, ggf. mit Hausnummer/PLZ).",
       "constraints": {
-        "required": true
+        "required": false
       }
     }
   ]

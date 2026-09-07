@@ -3,7 +3,7 @@
   "app-entwickler-name": "ondics-gmbh",
   "name-in-url": "Spielplaetze",
   "name": "Spielplätze",
-  "app-version": "1.30.0",
+  "app-version": "1.30.1",
   "app-package-version": "2",
   "odas-app-icon": "assets/odas-app-icon.svg",
   "app-icon": "assets/odas-app-icon.svg",
@@ -62,8 +62,8 @@
   "daten": {
     "beschreibung": "CSV-Daten aus einem Open Data Portal werden direkt im Browser geladen und in Karte sowie Tabelle dargestellt.",
     "schema": "assets/schema.json",
-    "beispiel": "",
-    "beispiel-url": ""
+    "beispiel": "Semikolon-getrennte CSV-Datei mit Kopfzeile (12 Spalten: id, spielplatzart, ortsteil, name, Adresse, Ausstattung); Koordinaten werden zur Laufzeit geokodiert.",
+    "beispiel-url": "https://www.berlin.de/ba-steglitz-zehlendorf/politik-und-verwaltung/aemter/strassen-und-gruenflaechenamt/gruenflaechen/spiel-und-sportplaetze/simple-search-spielplaetze/index.php/index/all.csv?q="
   },
   "branding-css": "",
   "api-version": "1",
@@ -237,8 +237,8 @@
       "format": {
         "typ": "url"
       },
-      "default": "",
-      "beispiel": "",
+      "default": "https://www.berlin.de/ba-steglitz-zehlendorf/politik-und-verwaltung/aemter/strassen-und-gruenflaechenamt/gruenflaechen/spiel-und-sportplaetze/simple-search-spielplaetze/",
+      "beispiel": "https://www.berlin.de/ba-steglitz-zehlendorf/politik-und-verwaltung/aemter/strassen-und-gruenflaechenamt/gruenflaechen/spiel-und-sportplaetze/simple-search-spielplaetze/",
       "erforderlich": "ja"
     },
     "fusszeile": {
