@@ -1183,7 +1183,7 @@ function initApp(data, container, uid, state) {
     render();
   }
 
-  ["sp-search", "sp-ortsteil", "sp-art"].forEach(function (id) {
+  ["sp-search-" + uid, "sp-ortsteil-" + uid, "sp-art-" + uid].forEach(function (id) {
     container.querySelector("#" + id).addEventListener("input", resetPageAndRender);
   });
   ["sp-barrierefrei", "sp-ballspielen"].forEach(function (id) {

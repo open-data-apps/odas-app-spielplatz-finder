@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.30.3 - 2026-09-08
+- **FIX:** Filter-Event-Bindung mit Instanz-Suffix (F-101, Live-Fund): `#sp-search`/`#sp-ortsteil`/`#sp-art` trugen kein `-${uid}` — Datenladen endete mit „Cannot read properties of null (reading 'addEventListener')".
+
 ## 1.30.2 - 2026-09-08
 - **FIX:** Leerzustand ohne Datenquelle zeigt keine Lade-Reste mehr (F-98, Live-Fund): „Karte wird vorbereitet …“ und „Lade Daten …“ werden ersetzt (Map-Status/Leer-/Fehlerzustand).
 
