@@ -489,14 +489,21 @@ function app(configdata = {}, enclosingHtmlDivElement) {
   }
 
   const rawApiUrl = getOdasApiUrl(configdata, "spielplaetze");
-  if (!rawApiUrl) {
-    showConfigInfo("Es ist keine Datenquelle konfiguriert.");
+  const spKontext = {
+    url: rawApiUrl,
+    label: "Spielplatz-CSV",
+    typLabel: "Statische Datei",
+    erwarteterTyp: "csv-zip",
+  };
+  const apiUrl = normalizeApiUrl(rawApiUrl);
+  if (!rawApiUrl || !apiUrl) {
+    renderOdasFehler(enclosingHtmlDivElement, new Error("Keine Datenquelle konfiguriert."), spKontext);
     return null;
   }
-
-  const apiUrl = normalizeApiUrl(rawApiUrl);
-  if (!apiUrl) {
-    showConfigInfo("Es ist keine Datenquelle konfiguriert.");
+  // Variante A (F-92): Typprüfung vor dem ersten Fetch.
+  const spTypWarn = validateUrlTypErwartung(apiUrl, "csv-zip");
+  if (spTypWarn) {
+    renderOdasFehler(enclosingHtmlDivElement, new Error(spTypWarn), spKontext);
     return null;
   }
 
@@ -521,8 +528,20 @@ function app(configdata = {}, enclosingHtmlDivElement) {
     })
     .catch(function (err) {
       if (state.disposed) return;
-      showLoadError(err.message);
       console.error(err);
+      const spTableWrap = enclosingHtmlDivElement.querySelector(
+        `#sp-tbody-${spUid}`,
+      );
+      if (spTableWrap) {
+        spTableWrap.innerHTML =
+          '<tr><td colspan="7"><div class="sp-fehler-slot"></div></td></tr>';
+        renderOdasFehler(
+          spTableWrap.querySelector(".sp-fehler-slot"),
+          err,
+          spKontext,
+        );
+      }
+      clearLoadingPlaceholders("Keine Karte: Daten konnten nicht geladen werden.");
     });
 
   return null;
@@ -538,28 +557,12 @@ function app(configdata = {}, enclosingHtmlDivElement) {
     if (mapStatus) mapStatus.textContent = mapText;
   }
 
-  function showConfigInfo(message) {
-    enclosingHtmlDivElement.querySelector(`#sp-tbody-${spUid}`).innerHTML =
-      `<tr><td colspan="7" class="text-center p-3">
-         <div class="alert alert-info mb-0" role="alert">${escapeHtml(message)}</div>
-       </td></tr>`;
-    clearLoadingPlaceholders("Keine Karte: keine Datenquelle konfiguriert.");
-  }
-
   function showEmptyDataInfo(message) {
     enclosingHtmlDivElement.querySelector(`#sp-tbody-${spUid}`).innerHTML =
       `<tr><td colspan="7" class="text-center p-3">
          <div class="alert alert-info mb-0" role="alert">${escapeHtml(message)}</div>
        </td></tr>`;
     clearLoadingPlaceholders("Keine Karte: keine Daten gefunden.");
-  }
-
-  function showLoadError(message) {
-    enclosingHtmlDivElement.querySelector(`#sp-tbody-${spUid}`).innerHTML =
-      `<tr><td colspan="7" class="text-center p-3">
-         <div class="alert alert-danger mb-0" role="alert"><strong>Fehler beim Laden der Daten:</strong> ${escapeHtml(message)}</div>
-       </td></tr>`;
-    clearLoadingPlaceholders("Keine Karte: Daten konnten nicht geladen werden.");
   }
 }
 

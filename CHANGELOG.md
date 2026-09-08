@@ -1,6 +1,7 @@
 # Changelog
 
 ## 1.30.3 - 2026-09-08
+- **FIX:** Variante-A-Verdrahtung (F-92): Typprüfung (csv-zip) vor dem ersten Fetch; Quellen- und Ladefehler über `renderOdasFehler`; verwaiste Helfer showConfigInfo/showLoadError entfernt (1.30.3 -> 1.30.4).
 - **FIX:** Filter-Event-Bindung mit Instanz-Suffix (F-101, Live-Fund): `#sp-search`/`#sp-ortsteil`/`#sp-art` trugen kein `-${uid}` — Datenladen endete mit „Cannot read properties of null (reading 'addEventListener')".
 
 ## 1.30.2 - 2026-09-08
