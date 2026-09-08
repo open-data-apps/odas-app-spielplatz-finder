@@ -527,13 +527,23 @@ function app(configdata = {}, enclosingHtmlDivElement) {
 
   return null;
 
+  function clearLoadingPlaceholders(mapText) {
+    const s = enclosingHtmlDivElement.querySelector(`#sp-data-spinner-${spUid}`);
+    if (s) s.style.display = "none";
+    // Der Text "Lade Daten …" steht außerhalb des Spinners und blieb im
+    // Leer-/Fehlerzustand stehen (F-98, Live-Fund 2026-09-08).
+    const count = enclosingHtmlDivElement.querySelector(`#sp-count-${spUid}`);
+    if (count) count.textContent = "";
+    const mapStatus = enclosingHtmlDivElement.querySelector(`#sp-map-status-${spUid}`);
+    if (mapStatus) mapStatus.textContent = mapText;
+  }
+
   function showConfigInfo(message) {
     enclosingHtmlDivElement.querySelector(`#sp-tbody-${spUid}`).innerHTML =
       `<tr><td colspan="7" class="text-center p-3">
          <div class="alert alert-info mb-0" role="alert">${escapeHtml(message)}</div>
        </td></tr>`;
-    const s = enclosingHtmlDivElement.querySelector(`#sp-data-spinner-${spUid}`);
-    if (s) s.style.display = "none";
+    clearLoadingPlaceholders("Keine Karte: keine Datenquelle konfiguriert.");
   }
 
   function showEmptyDataInfo(message) {
@@ -541,8 +551,7 @@ function app(configdata = {}, enclosingHtmlDivElement) {
       `<tr><td colspan="7" class="text-center p-3">
          <div class="alert alert-info mb-0" role="alert">${escapeHtml(message)}</div>
        </td></tr>`;
-    const s = enclosingHtmlDivElement.querySelector(`#sp-data-spinner-${spUid}`);
-    if (s) s.style.display = "none";
+    clearLoadingPlaceholders("Keine Karte: keine Daten gefunden.");
   }
 
   function showLoadError(message) {
@@ -550,8 +559,7 @@ function app(configdata = {}, enclosingHtmlDivElement) {
       `<tr><td colspan="7" class="text-center p-3">
          <div class="alert alert-danger mb-0" role="alert"><strong>Fehler beim Laden der Daten:</strong> ${escapeHtml(message)}</div>
        </td></tr>`;
-    const s = enclosingHtmlDivElement.querySelector(`#sp-data-spinner-${spUid}`);
-    if (s) s.style.display = "none";
+    clearLoadingPlaceholders("Keine Karte: Daten konnten nicht geladen werden.");
   }
 }
 

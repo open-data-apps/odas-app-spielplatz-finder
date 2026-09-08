@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.30.2 - 2026-09-08
+- **FIX:** Leerzustand ohne Datenquelle zeigt keine Lade-Reste mehr (F-98, Live-Fund): „Karte wird vorbereitet …“ und „Lade Daten …“ werden ersetzt (Map-Status/Leer-/Fehlerzustand).
+
 ## 1.30.1 - 2026-09-07
 - **FIX:** Frictionless-Härtung: `assets/schema.json` mit `$schema`, Titeln und ehrlichen Typen (Koordinaten `number`, Anzahl `integer`); `daten.beispiel`/`beispiel-url` und `urlDaten` befüllt. URL bleibt unverändert (Berlin-Server antwortet auf Parameter-Anhang mit 404 — dokumentierte Ausnahme, Schema beschreibt die normalisierte Form).
 
