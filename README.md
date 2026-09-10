@@ -18,6 +18,7 @@ Single Page Application mit Logo, Menü, Impressum/Datenschutz/Kontakt-Seiten un
 - Filter nach Ortsteil und Art
 - Zusatzfilter für Barrierefreiheit und Ballspielen
 - Ergebniszähler und Marker-Popups mit Kerndaten
+- Klick auf eine Tabellenzeile fokussiert den Spielplatz auf der Karte (fehlende Koordinaten werden per Adresssuche ergänzt)
 
 ---
 
@@ -104,6 +105,8 @@ Konfiguration wird bei lokaler Entwicklung aus [odas-config/config.json](odas-co
 
 - Datenabruf erfolgt direkt aus dem Browser gegen die konfigurierte `apiurls.spielplaetze`.
 - Die konfigurierte Datenquelle muss CORS freigeben.
+- Leaflet wird dynamisch per Loader aus `app/vendor/` geladen (nicht per `addToHead`).
+- Adressauflösung fehlender Koordinaten über nominatim.openstreetmap.org: Die Suche ist entprellt, Adressabfragen laufen sequenziell mit ca. 1,1 s Abstand (Nutzungsregeln des Dienstes).
 
 ---
 

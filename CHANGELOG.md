@@ -1,5 +1,13 @@
 # Changelog
 
+## 1.30.5 - 2026-09-10
+- **FIX:** Same-Page-Re-Render räumt Vorgänger-Instanz ab (SP-B1). Der Vorgänger blieb vorher `disposed = false`; seine Leaflet-Warteschleife lief weiter und rief `initApp` auf einem ersetzten Container.
+- **FIX:** Leaflet wird per dynamischem Loader mit `onload`/`onerror` geladen statt per `addToHead()` (SP-B2) — das 80×100-ms-Polling entfällt, Loader-Fehler haben einen echten Pfad.
+- **FIX:** Fehlerzustand „Leaflet fehlt" war halbfertig (SP-B3): `colspan="9"` bei 7 Spalten, Spinner und „Lade Daten …" blieben stehen (F-98-Klasse).
+- **FIX:** Adressauflösung (Nominatim) läuft sequenziell mit ca. 1,1 s Abstand und die Suche ist entprellt (SP-B4). Vorher startete jeder Tastendruck bis zu 8 parallele Anfragen — Risiko einer Sperrung.
+- **FIX:** CSV-Abruf ist per `AbortController` abbrechbar (SP-B5); `fetchOdasResource` reicht `signal` durch und wirft `AbortError` unverpackt.
+- **TECH:** `isLeerErgebnis` entfernt, `addToHead` gibt `""` zurück (SP-B6).
+
 ## 1.30.4 - 2026-09-08
 - **FIX:** Variante-A-Verdrahtung (F-92): Typprüfung (csv-zip) vor dem ersten Fetch; Quellen- und Ladefehler über `renderOdasFehler`; verwaiste Helfer showConfigInfo/showLoadError entfernt (1.30.3 -> 1.30.4).
 

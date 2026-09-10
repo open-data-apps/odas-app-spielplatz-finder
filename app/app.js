@@ -130,18 +130,20 @@ async function fetchViaOdasProxy(targetUrl, options = {}) {
   return proxyData.content;
 }
 
-async function fetchOdasResource(targetUrl, configdata = {}) {
+async function fetchOdasResource(targetUrl, configdata = {}, options = {}) {
   if (isOdasProxyEnabled(configdata)) {
-    return fetchViaOdasProxy(targetUrl);
+    return fetchViaOdasProxy(targetUrl, options);
   }
 
   try {
-    const response = await fetch(targetUrl);
+    const response = await fetch(targetUrl, { signal: options.signal });
     if (!response.ok) {
       throw new Error(`HTTP ${response.status}`);
     }
     return response.text();
   } catch (error) {
+    // Abbruch ist kein Fehlerfall – unverpackt weiterreichen (SP-B5).
+    if (error && error.name === "AbortError") throw error;
     throw new Error(
       `Direkter Datenabruf fehlgeschlagen (${error.message}). Bitte prüfen Sie die Daten-URL und die CORS-Freigabe der Datenquelle.`,
     );
@@ -319,15 +321,6 @@ function renderOdasFehler(container, error, kontext = {}) {
   container.innerHTML = `<div class="alert ${alertClass}" role="alert"><strong>${escapeHtml(titel)}</strong><p class="mb-1">${escapeHtml(info.hinweis)}</p>${urlZeile}<details class="small"><summary>Details</summary><code>${escapeHtml(info.detail || String(error))}</code></details></div>`;
 }
 
-function isLeerErgebnis(json) {
-  if (!json) return true;
-  if (Array.isArray(json) && json.length === 0) return true;
-  if (Array.isArray(json.records) && json.records.length === 0) return true;
-  if (Array.isArray(json.results) && json.results.length === 0) return true;
-  if (json.result && Array.isArray(json.result.records) && json.result.records.length === 0) return true;
-  return false;
-}
-
 
 // F-51/F-70: Container -> Teardown-Callback. Wird synchron zu Beginn von
 // app() gesetzt (vor jeglicher DOM-/Async-Arbeit) und setzt u. a. das
@@ -358,16 +351,29 @@ function app(configdata = {}, enclosingHtmlDivElement) {
     datenStand: null,
     disposed: false,
     map: null,
+    loadController: null, // SP-B5: laufender CSV-Abruf ist abbrechbar
     // Monoton wachsender Token: wird bei Dispose erhoeht, um laufende
     // Geocode-Fortsetzungen als ueberholt zu markieren (Muster wie F-57 in
     // odas-app-realtimedataview).
     geocodeToken: 0,
   };
-  // F-51/F-70: Container -> Abbaufunktion dieser Instanz. Ueberschreibt
-  // synchron jeden evtl. noch vorhandenen Eintrag fuer denselben Container.
+  // F-51/F-70: Container -> Abbaufunktion dieser Instanz.
+  // BG/SP-B1: Vorgänger-Instanz desselben Containers zuerst abräumen — sonst
+  // bleibt der Vorgänger `disposed = false`, seine Leaflet-Polling-Schleife
+  // läuft weiter und ruft `initApp` auf einem bereits ersetzten Container.
+  const spVorherigerTeardown = spTeardowns.get(enclosingHtmlDivElement);
+  if (spVorherigerTeardown) {
+    try {
+      spVorherigerTeardown();
+    } catch (_e) {}
+  }
   spTeardowns.set(enclosingHtmlDivElement, function () {
     state.disposed = true;
     state.geocodeToken++;
+    if (state.loadController) {
+      state.loadController.abort();
+      state.loadController = null;
+    }
     if (state.map) {
       try {
         state.map.remove();
@@ -508,7 +514,8 @@ function app(configdata = {}, enclosingHtmlDivElement) {
   }
 
   // --- Daten laden (nicht-async, via .then()) ---
-  fetchSpielplatzCsv(apiUrl, configdata, state)
+  state.loadController = new AbortController();
+  fetchSpielplatzCsv(apiUrl, configdata, state, state.loadController.signal)
     .then(function (csvText) {
       // F-70: Seitenwechsel waehrend des Fetch — abbrechen, bevor irgendetwas
       // geparst oder in den (evtl. abgebauten/wiederverwendeten) DOM
@@ -566,16 +573,17 @@ function app(configdata = {}, enclosingHtmlDivElement) {
   }
 }
 
-async function fetchSpielplatzCsv(apiUrl, configdata = {}, state) {
+async function fetchSpielplatzCsv(apiUrl, configdata = {}, state, signal) {
   // Standard ist der Direktabruf; der ODAS-Proxy nur bei proxyAktiv=ja.
   if (isOdasProxyEnabled(configdata)) {
-    return fetchViaOdasProxy(apiUrl);
+    return fetchViaOdasProxy(apiUrl, { signal });
   }
-  return fetchCSVDirect(apiUrl, state);
+  return fetchCSVDirect(apiUrl, state, signal);
 }
 
-async function fetchCSVDirect(apiUrl, state) {
-  const response = await fetch(apiUrl, { method: "GET" });
+async function fetchCSVDirect(apiUrl, state, signal) {
+  // SP-B5: `signal` bricht einen laufenden Download beim Seitenwechsel ab.
+  const response = await fetch(apiUrl, { method: "GET", signal });
   if (!response.ok) {
     throw new Error(`GET ${apiUrl} -> HTTP ${response.status}`);
   }
@@ -609,29 +617,81 @@ function normalizeApiUrl(apiUrl) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Warte auf Leaflet, dann App initialisieren                         */
+/*  Leaflet dynamisch laden (SP-B2)                                    */
+/* ------------------------------------------------------------------ */
+// Vorher hing Leaflet als statisches Script in addToHead(); die App wartete
+// dann in einer 80×100-ms-Polling-Schleife auf `window.L`. Jetzt lädt ein
+// richtiger Loader mit onload/onerror — kein Polling, echter Fehlerpfad.
+function ladeLeaflet() {
+  return new Promise(function (resolve, reject) {
+    if (typeof L !== "undefined") {
+      resolve();
+      return;
+    }
+    if (!document.getElementById("sp-leaflet-css")) {
+      const link = document.createElement("link");
+      link.id = "sp-leaflet-css";
+      link.rel = "stylesheet";
+      link.href = "vendor/leaflet/leaflet.css";
+      document.head.appendChild(link);
+    }
+    const src = "vendor/leaflet/leaflet.js";
+    const fehler = function () {
+      reject(new Error("Leaflet konnte nicht geladen werden."));
+    };
+    const vorhanden = document.querySelector('script[src="' + src + '"]');
+    if (vorhanden) {
+      if (vorhanden.spGeladen) {
+        resolve();
+        return;
+      }
+      vorhanden.addEventListener("load", function () { resolve(); });
+      vorhanden.addEventListener("error", fehler);
+      return;
+    }
+    const script = document.createElement("script");
+    script.id = "sp-leaflet-js";
+    script.src = src;
+    script.onload = function () {
+      script.spGeladen = true;
+      resolve();
+    };
+    script.onerror = fehler;
+    document.head.appendChild(script);
+  });
+}
+
+/* ------------------------------------------------------------------ */
+/*  Leaflet laden, dann App initialisieren                              */
 /* ------------------------------------------------------------------ */
 function waitForLeafletThenInit(data, container, uid, state) {
-  let tries = 0;
-  function check() {
-    // F-70: Instanz kann waehrend des Pollings (Seitenwechsel) abgebaut
-    // worden sein — dann weder initApp() noch weitere DOM-Schreibvorgaenge
-    // ausloesen, und die Poll-Schleife nicht fortsetzen.
-    if (state.disposed) return;
-    if (typeof L !== "undefined") {
+  // Zwei Argumente statt .catch(): ein Fehler in initApp wird sonst vom
+  // Loader-Fehlerpfad geschluckt und als „Leaflet konnte nicht geladen
+  // werden“ fehletikettiert.
+  ladeLeaflet().then(
+    function () {
+      // F-70: waehrend des Ladens kann die Instanz abgebaut worden sein.
+      if (state.disposed) return;
       initApp(data, container, uid, state);
-      return;
-    }
-    if (tries++ > 80) {
-      container.querySelector(`#sp-tbody-${uid}`).innerHTML =
-        `<tr><td colspan="9" class="text-danger text-center">
-           Leaflet konnte nicht geladen werden.
-         </td></tr>`;
-      return;
-    }
-    setTimeout(check, 100);
-  }
-  check();
+    },
+    function (error) {
+      console.warn("Spielplatz-Finder:", error);
+      if (state.disposed) return;
+      // SP-B3: Der Fehlerzustand war halbfertig — colspan passte nicht zur
+      // 7-spaltigen Tabelle, und Spinner/„Lade Daten …“ blieben stehen (F-98).
+      const tbody = container.querySelector(`#sp-tbody-${uid}`);
+      if (tbody) {
+        tbody.innerHTML =
+          '<tr><td colspan="7" class="text-danger text-center">Leaflet konnte nicht geladen werden.</td></tr>';
+      }
+      const spinner = container.querySelector(`#sp-data-spinner-${uid}`);
+      if (spinner) spinner.style.display = "none";
+      const count = container.querySelector(`#sp-count-${uid}`);
+      if (count) count.textContent = "";
+      const mapStatus = container.querySelector(`#sp-map-status-${uid}`);
+      if (mapStatus) mapStatus.textContent = "Keine Karte: Kartendarstellung nicht verfuegbar.";
+    },
+  );
 }
 
 /* ------------------------------------------------------------------ */
@@ -988,6 +1048,37 @@ function initApp(data, container, uid, state) {
     return [lat, lon];
   }
 
+  // SP-B4: Nominatim erlaubt rund eine Anfrage pro Sekunde und keine
+  // Parallel-Bursts. Vorher startete jeder Render bis zu 8 Anfragen gleichzeitig
+  // (und jeder Tastendruck einen Render) — das riskierte eine Sperrung.
+  // Jetzt wartet eine Warteschlange und arbeitet sequenziell mit Abstand.
+  const GEOCODE_ABSTAND_MS = 1100;
+  const geocodeWarteschlange = [];
+  let geocodeLaeuft = false;
+
+  function pumpeGeocodeWarteschlange() {
+    if (geocodeLaeuft || state.disposed) return;
+    const auftrag = geocodeWarteschlange.shift();
+    if (!auftrag) return;
+    geocodeLaeuft = true;
+    geocodeAddress(auftrag.query)
+      .then(function (coords) {
+        if (state.geocodeToken !== auftrag.token) return;
+        geocodeCache.set(auftrag.key, coords);
+      })
+      .catch(function () {
+        if (state.geocodeToken !== auftrag.token) return;
+        geocodeCache.set(auftrag.key, null);
+      })
+      .finally(function () {
+        geocodeInFlight.delete(auftrag.key);
+        geocodeLaeuft = false;
+        if (state.geocodeToken !== auftrag.token) return;
+        setTimeout(pumpeGeocodeWarteschlange, GEOCODE_ABSTAND_MS);
+        scheduleRender();
+      });
+  }
+
   function queueGeocode(sp) {
     const key = geocodeKey(sp);
     const query = geocodeQuery(sp);
@@ -999,22 +1090,8 @@ function initApp(data, container, uid, state) {
     // bei Dispose erhoeht, sodass eine verspaetet zurueckkommende Anfrage
     // erkennt, dass ihre Instanz nicht mehr aktiv ist, und weder den Cache
     // fuellt noch einen Render auf einer bereits entfernten Karte ausloest.
-    const requestToken = state.geocodeToken;
-    geocodeAddress(query)
-      .then(function (coords) {
-        if (state.geocodeToken !== requestToken) return;
-        geocodeCache.set(key, coords);
-      })
-      .catch(function () {
-        if (state.geocodeToken !== requestToken) return;
-        geocodeCache.set(key, null);
-      })
-      .finally(function () {
-        geocodeInFlight.delete(key);
-        if (state.geocodeToken !== requestToken) return;
-        scheduleRender();
-      });
-
+    geocodeWarteschlange.push({ key: key, query: query, token: state.geocodeToken });
+    pumpeGeocodeWarteschlange();
     return true;
   }
 
@@ -1186,7 +1263,24 @@ function initApp(data, container, uid, state) {
     render();
   }
 
-  ["sp-search-" + uid, "sp-ortsteil-" + uid, "sp-art-" + uid].forEach(function (id) {
+  // SP-B4: Suche entprellen — jeder Tastendruck baute sonst die ganze Tabelle
+  // plus Marker (und Geocode-Aufträge) neu auf.
+  function entprellt(fn, millis) {
+    let timer = null;
+    return function () {
+      if (timer) clearTimeout(timer);
+      timer = setTimeout(function () {
+        timer = null;
+        if (state.disposed) return;
+        fn();
+      }, millis);
+    };
+  }
+
+  container
+    .querySelector("#sp-search-" + uid)
+    .addEventListener("input", entprellt(resetPageAndRender, 300));
+  ["sp-ortsteil-" + uid, "sp-art-" + uid].forEach(function (id) {
     container.querySelector("#" + id).addEventListener("input", resetPageAndRender);
   });
   ["sp-barrierefrei", "sp-ballspielen"].forEach(function (id) {
@@ -1221,20 +1315,9 @@ function initApp(data, container, uid, state) {
 }
 
 /*
- * Diese Funktion lädt Leaflet CSS und JS in den Head.
+ * Diese Funktion laedt Bibliotheken und Skripte in den Head.
+ * SP-B2: Leaflet wird nicht mehr hier geladen, sondern per ladeLeaflet().
  */
 function addToHead() {
-  // Leaflet CSS
-  const leafletCss = document.createElement("link");
-  leafletCss.rel = "stylesheet";
-  leafletCss.href = "vendor/leaflet/leaflet.css";
-  leafletCss.crossOrigin = "anonymous";
-  document.head.appendChild(leafletCss);
-
-  // Leaflet JS
-  const leafletJs = document.createElement("script");
-  leafletJs.src = "vendor/leaflet/leaflet.js";
-  leafletJs.async = false;
-  leafletJs.crossOrigin = "anonymous";
-  document.head.appendChild(leafletJs);
+  return ``;
 }
