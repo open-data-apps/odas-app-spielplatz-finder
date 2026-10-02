@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.30.6 - 2026-10-02
+- ENH: Verwendete ODAS-Dienste in `odas-services` deklariert.
+
 ## 1.30.5 - 2026-09-10
 - **FIX:** Same-Page-Re-Render räumt Vorgänger-Instanz ab (SP-B1). Der Vorgänger blieb vorher `disposed = false`; seine Leaflet-Warteschleife lief weiter und rief `initApp` auf einem ersetzten Container.
 - **FIX:** Leaflet wird per dynamischem Loader mit `onload`/`onerror` geladen statt per `addToHead()` (SP-B2) — das 80×100-ms-Polling entfällt, Loader-Fehler haben einen echten Pfad.
