@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.30.8 - 2026-10-08
+- DOC: F-146: Schema beschreibt unterstützte Eingabefelder; Namensfeld korrekt als name statt ungenutztem spielplatz_name, Aliasse und Geokodierung klar benannt.
+
+## 1.30.7 - 2026-10-08
+- FIX: F-135: Quote-Einfassungen bis zur Feldzerlegung erhalten; Namen mit Semikolon/Quotes verschieben keine Koordinatenfelder mehr.
+
 ## 1.30.6 - 2026-10-02
 - ENH: Verwendete ODAS-Dienste in `odas-services` deklariert.
 

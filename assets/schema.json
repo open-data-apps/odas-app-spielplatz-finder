@@ -2,12 +2,13 @@
   "$schema": "https://frictionlessdata.io/schemas/table-schema.json",
   "name": "odas-app-spielplatz-finder",
   "title": "Spielplatz-Finder",
+  "description": "Teilmenge unterstützter Eingabefelder einer Spielplatzquelle. Aliasse sind jeweils angegeben; dies ist kein Schema des normalisierten internen Objekts. Die App liest CSV; diese Namen sind die erwarteten Spaltenköpfe.",
   "fields": [
     {
       "name": "ortsteil",
       "title": "Ortsteil",
       "type": "string",
-      "description": "Ortsteil des Spielplatzes.",
+      "description": "Ortsteil des Spielplatzes. Eingabe-Alias: bezirk.",
       "constraints": {
         "required": false
       }
@@ -16,7 +17,7 @@
       "name": "art",
       "title": "Art",
       "type": "string",
-      "description": "Art des Spielplatzes (normalisiert aus spielplatzart), z. B. Kleinkinderspielplatz.",
+      "description": "Art des Spielplatzes, z. B. Kleinkinderspielplatz. Eingabe-Aliasse: spielplatzart oder anlagenart.",
       "constraints": {
         "required": false
       }
@@ -43,7 +44,7 @@
       "name": "lat",
       "title": "Breite",
       "type": "number",
-      "description": "Breitengrad aus Geokodierung zur Laufzeit.",
+      "description": "Breitengrad der Eingabe (weitere Eingabe-Aliasse: breitengrad, ykoord, koordy); fehlt eine nutzbare Position, kann die Runtime die Adresse geokodieren.",
       "constraints": {
         "required": false
       }
@@ -52,7 +53,7 @@
       "name": "lon",
       "title": "Länge",
       "type": "number",
-      "description": "Längengrad aus Geokodierung zur Laufzeit.",
+      "description": "Längengrad der Eingabe (weitere Eingabe-Aliasse: laengengrad, xkoord, koordx); fehlt eine nutzbare Position, kann die Runtime die Adresse geokodieren.",
       "constraints": {
         "required": false
       }
@@ -76,10 +77,10 @@
       }
     },
     {
-      "name": "spielplatz_name",
+      "name": "name",
       "title": "Spielplatz-Name",
       "type": "string",
-      "description": "Name des Spielplatzes (normalisiert aus name).",
+      "description": "Name des Spielplatzes. Unterstützte Eingabe-Aliasse: bezeichnung, adresse oder strasse.",
       "constraints": {
         "required": false
       }
@@ -88,7 +89,7 @@
       "name": "adresse",
       "title": "Adresse",
       "type": "string",
-      "description": "Adresse (normalisiert aus strasse, ggf. mit Hausnummer/PLZ).",
+      "description": "Adresse der Eingabe; ist zusätzlich strasse vorhanden, wird strasse bevorzugt.",
       "constraints": {
         "required": false
       }

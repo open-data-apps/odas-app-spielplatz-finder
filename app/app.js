@@ -700,7 +700,7 @@ function waitForLeafletThenInit(data, container, uid, state) {
 function parseCSV(text) {
   if (!text || !text.trim()) return [];
 
-  const records = splitCSVRecords(text.replace(/\r\n?/g, "\n"));
+  const records = splitCSVRecords(text);
   if (records.length < 2) return [];
 
   const delimiter = detectDelimiter(records[0]);
@@ -730,34 +730,25 @@ function detectDelimiter(headerLine) {
 }
 
 function splitCSVRecords(text) {
+  // F-135: Quotes bis zur Feldauswertung erhalten, nur äußere Zeilen trennen.
   const records = [];
-  let current = "";
-  let inQuotes = false;
-
+  let current = "", inQuotes = false;
   for (let i = 0; i < text.length; i++) {
     const ch = text[i];
-    const next = text[i + 1];
-
     if (ch === '"') {
-      if (inQuotes && next === '"') {
-        current += '"';
-        i++;
-      } else {
-        inQuotes = !inQuotes;
-      }
-      continue;
-    }
-
-    if (ch === "\n" && !inQuotes) {
-      records.push(current);
+      current += ch;
+      if (inQuotes && text[i + 1] === '"') current += text[++i];
+      else inQuotes = !inQuotes;
+    } else if ((ch === "\n" || ch === "\r") && !inQuotes) {
+      if (ch === "\r" && text[i + 1] === "\n") i++;
+      if (current.trim()) records.push(current);
       current = "";
-      continue;
+    } else {
+      current += ch;
     }
-
-    current += ch;
   }
-
-  if (current !== "") records.push(current);
+  if (inQuotes) throw new Error("CSV enthält nicht geschlossene Anführungszeichen.");
+  if (current.trim()) records.push(current);
   return records;
 }
 
