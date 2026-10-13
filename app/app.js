@@ -672,6 +672,9 @@ function waitForLeafletThenInit(data, container, uid, state) {
     function () {
       // F-70: waehrend des Ladens kann die Instanz abgebaut worden sein.
       if (state.disposed) return;
+      // F-156: Markerbild-Basis explizit setzen; sonst leitet Leaflet sie aus dem
+      // ggf. noch nicht geladenen leaflet.css ab und merkt sich einen falschen Pfad.
+      L.Icon.Default.imagePath = new URL("vendor/leaflet/images/", document.baseURI).href;
       initApp(data, container, uid, state);
     },
     function (error) {

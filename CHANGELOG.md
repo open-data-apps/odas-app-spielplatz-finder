@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.30.9 - 2026-10-13
+- FIX: F-156: Markerbilder erscheinen auch, wenn das Karten-CSS später lädt (explizite Leaflet-Bildbasis statt Ableitung aus dem CSS).
+
 ## 1.30.8 - 2026-10-08
 - DOC: F-146: Schema beschreibt unterstützte Eingabefelder; Namensfeld korrekt als name statt ungenutztem spielplatz_name, Aliasse und Geokodierung klar benannt.
 
