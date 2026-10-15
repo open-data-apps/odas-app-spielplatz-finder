@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.30.13 - 2026-10-15
+- FIX: Dauerhafte Fehler der Adresssuche erzeugen keine Endlosschleife mehr: Server- und Netzwerkfehler werden mit wachsender Pause höchstens dreimal versucht, andere 4xx-Fehler und unlesbare Antworten sofort für die laufende Sitzung aufgegeben (nicht im `localStorage` gespeichert, nach dem Neuladen erneut versucht). Fehlversuche lösen kein Neuzeichnen von Tabelle und Karte mehr aus, geöffnete Popups bleiben offen.
+- FIX: Nach abgeschlossener Adresssuche passt die Karte ihren Ausschnitt einmal an alle Marker der Seite an.
+
 ## 1.30.12 - 2026-10-15
 - FIX: Adressauflösung hält den Mindestabstand von 1,1 s zwischen zwei Nominatim-Anfragen wirklich ein (vorher starteten Neuzeichnungen sofort die nächste Anfrage), pausiert nach HTTP 429 für 60 s und speichert Fehler nicht mehr als „keine Koordinaten“, sodass betroffene Adressen später erneut angefragt werden. Die Warteschlange enthält nur Adressen der aktuellen Tabellenseite; ermittelte Koordinaten bleiben im `localStorage` (`odas-spielplatz-geocode-v1`) über das Neuladen erhalten.
 - FIX: Die Standardquelle (Berlin, Steglitz-Zehlendorf) kommt ohne Nominatim aus: Koordinaten für 137 von 138 Spielplätzen stammen aus einer hinterlegten Tabelle (Flächenschwerpunkte aus dem Geoportal Berlin, Datenlizenz Deutschland – Zero – Version 2.0); nur „Marshallstraße 3 SP“ wird weiterhin per Adresse ermittelt. Quelle und Lizenz in Beschreibung und README genannt, Datenschutzhinweis um den `localStorage`-Zwischenspeicher ergänzt.

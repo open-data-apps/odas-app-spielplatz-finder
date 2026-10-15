@@ -113,7 +113,7 @@ Konfiguration wird bei lokaler Entwicklung aus [odas-config/config.json](odas-co
 - Datenabruf erfolgt direkt aus dem Browser gegen die konfigurierte `apiurls.spielplaetze`.
 - Die konfigurierte Datenquelle muss CORS freigeben.
 - Leaflet wird dynamisch per Loader aus `app/vendor/` geladen (nicht per `addToHead`).
-- Adressauflösung fehlender Koordinaten über nominatim.openstreetmap.org (nur Einträge ohne Koordinaten und ohne Treffer in der hinterlegten Tabelle, nur aktuelle Tabellenseite): Die Suche ist entprellt, Adressabfragen laufen sequenziell mit mindestens 1,1 s Abstand zwischen zwei Anfragen, nach HTTP 429 pausiert die Warteschlange 60 s; fehlgeschlagene Abfragen werden nicht gecacht und später wiederholt. Ermittelte Koordinaten werden im `localStorage` (`odas-spielplatz-geocode-v1`) zwischengespeichert (Nutzungsregeln des Dienstes).
+- Adressauflösung fehlender Koordinaten über nominatim.openstreetmap.org (nur Einträge ohne Koordinaten und ohne Treffer in der hinterlegten Tabelle, nur aktuelle Tabellenseite): Die Suche ist entprellt, Adressabfragen laufen sequenziell mit mindestens 1,1 s Abstand zwischen zwei Anfragen, nach HTTP 429 pausiert die Warteschlange 60 s und fragt danach erneut an; Server- und Netzwerkfehler werden mit wachsender Pause (10 s, 20 s) höchstens dreimal versucht, andere 4xx-Fehler und unlesbare Antworten sofort aufgegeben – Fehler gelten nur für die laufende Sitzung und werden nicht gespeichert. Ermittelte Koordinaten werden im `localStorage` (`odas-spielplatz-geocode-v1`) zwischengespeichert (Nutzungsregeln des Dienstes).
 
 ---
 

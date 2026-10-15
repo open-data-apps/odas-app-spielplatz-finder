@@ -1224,14 +1224,21 @@ function initApp(data, container, uid, state) {
   // (und jeder Tastendruck einen Render) — das riskierte eine Sperrung.
   // Jetzt wartet eine Warteschlange und arbeitet sequenziell mit Abstand.
   // Der Abstand gilt zwischen zwei Anfrage-Starts, auch wenn ein Render
-  // zwischendurch neue Aufträge einreiht; nach HTTP 429 pausiert die
-  // Warteschlange 60 s. Fehler werden nicht gecacht, die Adresse wird beim
-  // nächsten Render erneut eingereiht.
+  // zwischendurch neue Aufträge einreiht. Fehler landen nicht im localStorage:
+  // Nach HTTP 429 pausiert die Warteschlange 60 s und fragt danach erneut an;
+  // 5xx-/Netzwerkfehler werden mit wachsender Pause höchstens dreimal
+  // versucht, andere 4xx und unlesbare Antworten sofort aufgegeben – beides
+  // nur für diese Sitzung, nach dem Neuladen wird erneut angefragt.
   const GEOCODE_ABSTAND_MS = 1100;
   const GEOCODE_PAUSE_429_MS = 60000;
+  const GEOCODE_PAUSE_FEHLER_MS = 10000;
+  const GEOCODE_MAX_VERSUCHE = 3;
   const geocodeWarteschlange = [];
+  const geocodeFehlversuche = new Map();
   let geocodeLaeuft = false;
   let naechsterStartMs = 0;
+  // Nach abgeschlossener Geokodierung den Kartenausschnitt einmal anpassen.
+  let nachGeokodierungAnpassen = false;
 
   function leseGeocodeSpeicher() {
     try {
@@ -1250,6 +1257,23 @@ function initApp(data, container, uid, state) {
     } catch (_e) {}
   }
 
+  // Liefert true, wenn die Adresse später erneut angefragt werden soll.
+  function behandleGeocodeFehler(key, error) {
+    const status = error && error.status;
+    if (status === 429) {
+      naechsterStartMs = Date.now() + GEOCODE_PAUSE_429_MS;
+      return true;
+    }
+    const versuche = (geocodeFehlversuche.get(key) || 0) + 1;
+    geocodeFehlversuche.set(key, versuche);
+    if (error instanceof SyntaxError || (status >= 400 && status < 500) || versuche >= GEOCODE_MAX_VERSUCHE) {
+      geocodeCache.set(key, null);
+      return false;
+    }
+    naechsterStartMs = Date.now() + GEOCODE_PAUSE_FEHLER_MS * versuche;
+    return true;
+  }
+
   function pumpeGeocodeWarteschlange() {
     if (geocodeLaeuft || state.disposed || state.geocodePumpTimer) return;
     if (geocodeWarteschlange.length === 0) return;
@@ -1263,24 +1287,36 @@ function initApp(data, container, uid, state) {
     }
     const auftrag = geocodeWarteschlange.shift();
     geocodeLaeuft = true;
+    let erneutVersuchen = false;
+    const anfrage = geocodeAddress(auftrag.query);
+    // Erst nach dem Aufruf setzen: fetch startet darin synchron, der Abstand
+    // zählt ab diesem Zeitpunkt.
     naechsterStartMs = Date.now() + GEOCODE_ABSTAND_MS;
-    geocodeAddress(auftrag.query)
+    anfrage
       .then(function (coords) {
         if (state.geocodeToken !== auftrag.token) return;
         geocodeCache.set(auftrag.key, coords);
         speichereGeocode(auftrag.key, coords);
       })
       .catch(function (error) {
-        if (error && error.status === 429) {
-          naechsterStartMs = Date.now() + GEOCODE_PAUSE_429_MS;
-        }
+        if (state.geocodeToken !== auftrag.token) return;
+        erneutVersuchen = behandleGeocodeFehler(auftrag.key, error);
       })
       .finally(function () {
-        geocodeInFlight.delete(auftrag.key);
         geocodeLaeuft = false;
-        if (state.geocodeToken !== auftrag.token) return;
+        if (state.geocodeToken !== auftrag.token) {
+          geocodeInFlight.delete(auftrag.key);
+          return;
+        }
+        if (erneutVersuchen) {
+          // Ohne Neuzeichnen wieder einreihen (Key bleibt in geocodeInFlight);
+          // die Pause regelt naechsterStartMs.
+          geocodeWarteschlange.push(auftrag);
+        } else {
+          geocodeInFlight.delete(auftrag.key);
+          scheduleRender();
+        }
         pumpeGeocodeWarteschlange();
-        scheduleRender();
       });
   }
 
@@ -1352,6 +1388,13 @@ function initApp(data, container, uid, state) {
       selectedRowKey = pendingFocusKey;
       pendingFocusKey = "";
       highlightSelectedRow();
+    }
+
+    if (geocodeWarteschlange.length > 0 || geocodeLaeuft) {
+      nachGeokodierungAnpassen = true;
+    } else if (nachGeokodierungAnpassen) {
+      nachGeokodierungAnpassen = false;
+      kartenausschnittAnpassen = true;
     }
 
     const selectedMarker = selectedRowKey
