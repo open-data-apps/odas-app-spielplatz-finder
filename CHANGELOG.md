@@ -1,5 +1,8 @@
 # Changelog
 
+## 1.30.14 - 2026-10-15
+- FIX: Kopfzeile bei 360 px ohne Überlauf (Template): Logo- und Burger-Spalte passen sich der Breite an, das Menü-Symbol ragt nicht mehr über den rechten Rand. Keine Änderung an App-Code oder Konfiguration.
+
 ## 1.30.13 - 2026-10-15
 - FIX: Dauerhafte Fehler der Adresssuche erzeugen keine Endlosschleife mehr: Server- und Netzwerkfehler werden mit wachsender Pause höchstens dreimal versucht, andere 4xx-Fehler und unlesbare Antworten sofort für die laufende Sitzung aufgegeben (nicht im `localStorage` gespeichert, nach dem Neuladen erneut versucht). Fehlversuche lösen kein Neuzeichnen von Tabelle und Karte mehr aus, geöffnete Popups bleiben offen.
 - FIX: Nach abgeschlossener Adresssuche passt die Karte ihren Ausschnitt einmal an alle Marker der Seite an.
