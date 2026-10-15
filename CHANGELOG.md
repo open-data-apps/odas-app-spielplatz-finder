@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.30.12 - 2026-10-15
+- FIX: Adressauflösung hält den Mindestabstand von 1,1 s zwischen zwei Nominatim-Anfragen wirklich ein (vorher starteten Neuzeichnungen sofort die nächste Anfrage), pausiert nach HTTP 429 für 60 s und speichert Fehler nicht mehr als „keine Koordinaten“, sodass betroffene Adressen später erneut angefragt werden. Die Warteschlange enthält nur Adressen der aktuellen Tabellenseite; ermittelte Koordinaten bleiben im `localStorage` (`odas-spielplatz-geocode-v1`) über das Neuladen erhalten.
+- FIX: Die Standardquelle (Berlin, Steglitz-Zehlendorf) kommt ohne Nominatim aus: Koordinaten für 137 von 138 Spielplätzen stammen aus einer hinterlegten Tabelle (Flächenschwerpunkte aus dem Geoportal Berlin, Datenlizenz Deutschland – Zero – Version 2.0); nur „Marshallstraße 3 SP“ wird weiterhin per Adresse ermittelt. Quelle und Lizenz in Beschreibung und README genannt, Datenschutzhinweis um den `localStorage`-Zwischenspeicher ergänzt.
+- FIX: Die Karte springt nicht mehr bei jeder eintreffenden Adresse, der Ausschnitt wird nur nach Filter- oder Seitenwechsel angepasst.
+- FIX: Trefferzähler im Plural korrigiert („138 Spielplätze gefunden“ statt „138 Spielplatzplätze gefunden“).
+
 ## 1.30.11 - 2026-10-15
 - DOCS: Neue Store-Screenshots: je drei Desktop- (1440 × 1000) und Mobile-Aufnahmen (390 × 844) der aktuellen App, aufgenommen auf der Dev-Instanz. Bisherige Bilder nach `docs/screenshots/archive/2026-10-13/` verschoben. Keine Änderung an App-Code oder Konfiguration.
 

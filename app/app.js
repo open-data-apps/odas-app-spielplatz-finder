@@ -366,6 +366,7 @@ function app(configdata = {}, enclosingHtmlDivElement) {
     // Geocode-Fortsetzungen als ueberholt zu markieren (Muster wie F-57 in
     // odas-app-realtimedataview).
     geocodeToken: 0,
+    geocodePumpTimer: null, // wartender Start der nächsten Nominatim-Anfrage
   };
   // F-51/F-70: Container -> Abbaufunktion dieser Instanz.
   // BG/SP-B1: Vorgänger-Instanz desselben Containers zuerst abräumen — sonst
@@ -380,6 +381,8 @@ function app(configdata = {}, enclosingHtmlDivElement) {
   spTeardowns.set(enclosingHtmlDivElement, function () {
     state.disposed = true;
     state.geocodeToken++;
+    clearTimeout(state.geocodePumpTimer);
+    state.geocodePumpTimer = null;
     if (state.loadController) {
       state.loadController.abort();
       state.loadController = null;
@@ -818,6 +821,157 @@ function isTruthyValue(value) {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Vorberechnete Koordinaten der Standardquelle                       */
+/* ------------------------------------------------------------------ */
+// Die Berlin-CSV enthält keine Koordinaten. Damit die Standardquelle ohne
+// Nominatim-Anfragen auskommt, liegen hier die Flächenschwerpunkte der
+// Spielplätze, Schlüssel ist das CSV-Feld `name` (= WFS-Feld `namenr`).
+// Quelle: Geoportal Berlin, WFS-Dienst „Grünanlagen“ (URL im README),
+// Layer gruenanlagen:spielplaetze (EPSG:4326), Bezirk Steglitz-Zehlendorf,
+// Stand 2026-10-15. Lizenz: Datenlizenz Deutschland – Zero – Version 2.0
+// (dl-de/zero-2-0). „Marshallstraße 3 SP“ fehlt im WFS und wird per Adresse
+// geokodiert. Format: { "<name>": [lat, lng] }.
+const VORBERECHNETE_KOORDINATEN = {
+  "Am Erlenbusch SP": [52.464327, 13.302443],
+  "Breitenbachplatz SP": [52.467050, 13.308672],
+  "Buchsweilerstraße SP": [52.443578, 13.280684],
+  "Dreipfuhlpark SP": [52.445144, 13.271221],
+  "Edwin-Redslob-Straße SP": [52.459478, 13.295725],
+  "Kaiser-Wilhelm-Platz SP": [52.464485, 13.297965],
+  "Messelpark SP": [52.464697, 13.293011],
+  "Bernkastler Platz SP": [52.440168, 13.346042],
+  "Calandrellistraße 51 SP": [52.441599, 13.338737],
+  "Dillgesstraße 11 SP": [52.434922, 13.341097],
+  "Dorfaue Alt-Lankwitz SP": [52.439466, 13.352877],
+  "Ahlener Weg SP -2/2": [52.411298, 13.303613],
+  "Asternplatz SP": [52.448689, 13.304615],
+  "Augustaplatz SP": [52.442651, 13.307387],
+  "Begonienplatz SP -1/2": [52.451155, 13.310864],
+  "Brauerplatz SP": [52.424012, 13.321236],
+  "Eduard-Spranger-Promenade SP -1/2": [52.432781, 13.315468],
+  "Finckensteinallee 170 SP": [52.432890, 13.280348],
+  "Lipaerstraße 28-29 SP": [52.445444, 13.312377],
+  "Marschnerstraße 44-46 SP": [52.443774, 13.316566],
+  "Platz der US-Berlin-Brigade SP": [52.419727, 13.283880],
+  "Schloßpark Lichterfelde SP -1/2": [52.439791, 13.318649],
+  "Sonneberger Weg 29a SP": [52.422603, 13.331037],
+  "Stubenrauchstraße 14b SP": [52.441824, 13.300945],
+  "Pfeddersheimer Weg SP": [52.427506, 13.209126],
+  "Potsdamer Chaussee 66 C SP": [52.422118, 13.201138],
+  "Von-der-Trenck-Straße 10 SP": [52.421428, 13.200355],
+  "Dubrowplatz SP": [52.435156, 13.221355],
+  "Klopstockstraße SP": [52.441473, 13.227093],
+  "Paul-Ernst-Park SP": [52.439757, 13.210765],
+  "Wasgenstraße SP": [52.430703, 13.214246],
+  "Althoffplatz SP": [52.456837, 13.331686],
+  "Althoffstraße 22 SP": [52.457459, 13.327649],
+  "Carmerplatz SP": [52.452606, 13.320664],
+  "Friedrichsruher Platz SP": [52.458813, 13.336526],
+  "Lenbachstraße 10 SP": [52.465587, 13.338203],
+  "Markusplatz SP": [52.448678, 13.342439],
+  "Martinstraße 9 SP": [52.452523, 13.323268],
+  "Munsterdamm 89 SP": [52.458226, 13.347849],
+  "Ruth-Andreas-Friedrich-Park SP -1/2": [52.455139, 13.309440],
+  "Ruth-Andreas-Friedrich-Park SP -2/2": [52.455405, 13.310596],
+  "Sachsenwaldstraße 4 SP": [52.463147, 13.340513],
+  "Südendstraße 24 SP": [52.455490, 13.333688],
+  "Dampferanlegestelle Wannsee SP": [52.421286, 13.175605],
+  "Steinstücken SP": [52.390173, 13.128685],
+  "Bolchener Straße SP": [52.433394, 13.277076],
+  "Breitensteinweg SP": [52.409589, 13.257771],
+  "Brettnacher Straße SP": [52.436599, 13.278156],
+  "Gemeindewäldchen SP": [52.435441, 13.248446],
+  "Hoffbauerpfad SP": [52.419145, 13.255711],
+  "Jaehnstraße SP": [52.440126, 13.241159],
+  "Mörchinger Straße SP -1/2": [52.437995, 13.278119],
+  "Nieritzweg SP": [52.415487, 13.253539],
+  "Paul-Mebes-Park SP": [52.432067, 13.246250],
+  "Ramsteinweg SP": [52.413959, 13.255307],
+  "Schönower Park SP": [52.427692, 13.263256],
+  "Schönower Straße 5 SP": [52.429283, 13.257635],
+  "Werner-Sylten-Weg SP": [52.413406, 13.264635],
+  "Windsteiner Weg SP": [52.412408, 13.256554],
+  "Heinrich-Laehr-Park SP -2/2": [52.412953, 13.270133],
+  "Heinrich-Laehr-Park SP -1/2": [52.413961, 13.269776],
+  "Am Eichgarten- / Borstellpromenade SP": [52.445269, 13.342723],
+  "Schloßpark Lichterfelde SP -2/2": [52.438594, 13.316958],
+  "Yehudi-Menuhin-Park SP": [52.426476, 13.219877],
+  "Schilfluch- / Moorgraben SP": [52.414630, 13.296891],
+  "Rathaus Lankwitz SP -2/2": [52.437940, 13.341823],
+  "Teltowkanalpromenade SP": [52.429933, 13.309335],
+  "Apoldaer Straße SP -1/2": [52.419723, 13.343884],
+  "Krumme Lanke SP - Argentinische Allee": [52.448682, 13.246164],
+  "Fregestraße 39 SP": [52.464222, 13.332796],
+  "Mörchinger Straße SP -2/2": [52.438342, 13.278928],
+  "Grünzug Düppel-Süd SP -1/2": [52.422207, 13.233531],
+  "Döhlauer Pfad SP": [52.438456, 13.361703],
+  "Johann-Baptist-Gradl-Grünanlage SP -1/4": [52.415453, 13.321451],
+  "Johann-Baptist-Gradl-Grünanlage SP -2/4": [52.414901, 13.321933],
+  "Rütliplatz SP": [52.425742, 13.291993],
+  "Elisabethstraße 37 SP": [52.432043, 13.334263],
+  "Rathaus Lankwitz SP -1/2": [52.437837, 13.343885],
+  "Bäkepark SP -3/3": [52.444957, 13.326427],
+  "Echtermeyerstraße SP": [52.432558, 13.272197],
+  "Paulsenstraße 22a SP": [52.463506, 13.313848],
+  "Stewardstraße SP": [52.452583, 13.263336],
+  "Altdorfer Straße 1 SP": [52.428604, 13.306058],
+  "Schopenhauerstraße SP": [52.437131, 13.220026],
+  "Ahornstraße 3 SP": [52.433991, 13.253011],
+  "Lützelsteiner Weg SP": [52.446705, 13.271213],
+  "Königstraße 36 SP": [52.432895, 13.251784],
+  "Pappritz- / Wichurastraße SP -2/4": [52.427141, 13.360634],
+  "Thielpark und Triestpark SP -1/2": [52.448761, 13.284775],
+  "Peschkestraße 11 SP": [52.464431, 13.332146],
+  "Am Bäkequell SP": [52.452806, 13.316636],
+  "Waltershauser Straße SP": [52.424736, 13.346063],
+  "Schäferstraße SP": [52.411521, 13.136795],
+  "Charkiw-Park SP": [52.457079, 13.318148],
+  "Sembritzkistraße 24 SP": [52.452356, 13.352058],
+  "Curtiusstraße 14 SP": [52.442344, 13.293566],
+  "Bäkepark SP -1/3": [52.447537, 13.320454],
+  "Taylorstraße SP": [52.456195, 13.267474],
+  "Thielpark und Triestpark SP -2/2": [52.453368, 13.281306],
+  "Külzer Straße 3 SP": [52.458846, 13.332473],
+  "Marga-Meusel-Platz SP": [52.438186, 13.238474],
+  "Keffenbrinkweg SP": [52.430890, 13.363145],
+  "Georg-von-Siemens-Park SP": [52.449373, 13.358652],
+  "Lauenburger Platz SP": [52.460953, 13.338510],
+  "Harry-Bresslau-Park SP": [52.463706, 13.321267],
+  "Johann-Baptist-Gradl-Grünanlage SP -4/4": [52.411417, 13.325760],
+  "Osdorfer Straße 90-91 SP": [52.410824, 13.322331],
+  "Ahlener Weg SP -1/2": [52.410631, 13.304615],
+  "Schönhauser Straße 9 SP": [52.461136, 13.334992],
+  "Pappritz- / Wichurastraße SP -3/4": [52.430117, 13.362226],
+  "Grünzug am Buschgraben SP": [52.421763, 13.244693],
+  "Grünzug Düppel-Süd SP -2/2": [52.422535, 13.241598],
+  "Lepsiusstraße 10 SP": [52.465719, 13.321407],
+  "Breite Straße 6 SP": [52.453344, 13.326634],
+  "Gemeindepark Lankwitz SP": [52.431759, 13.347981],
+  "Kaulbachstraße 55 SP": [52.438132, 13.338887],
+  "Kolonie Königsgraben SP": [52.422903, 13.351616],
+  "Kolonie Schweizerland SP": [52.423462, 13.286405],
+  "Rathaus Lichterfelde Ost SP": [52.429054, 13.316939],
+  "Pappritz- / Wichurastraße SP -1/4": [52.422980, 13.359809],
+  "Lilienthal-Gedenkstätte SP -2/2": [52.414020, 13.337992],
+  "Karlplatz SP": [52.438155, 13.295638],
+  "Bäkepark SP -2/3": [52.447360, 13.322862],
+  "Breisgauer Straße 1 C SP": [52.440202, 13.216905],
+  "Johann-Baptist-Gradl-Grünanlage SP -3/4": [52.413365, 13.323354],
+  "Elisabeth-Bergner-Park SP": [52.465236, 13.315980],
+  "Lilienthal-Gedenkstätte SP -1/2": [52.412278, 13.328960],
+  "Stadtpark Steglitz SP -2/3": [52.448398, 13.333305],
+  "Fischtalpark SP -1/2": [52.443078, 13.255760],
+  "Stadtpark Steglitz SP -1/3": [52.447313, 13.335414],
+  "Apoldaer Straße SP -2/2": [52.420391, 13.344074],
+  "Begonienplatz SP -2/2": [52.451644, 13.311086],
+  "Stadtpark Steglitz SP -3/3": [52.447721, 13.330338],
+  "Potsdamer Straße 5 SP (Steglitz)": [52.433864, 13.302605],
+  "Pappritz- / Wichurastraße SP -4/4": [52.427799, 13.361906],
+  "Fischtalpark SP -2/2": [52.450232, 13.262215],
+  "Straße Zum Löwen SP": [52.426852, 13.159001],
+};
+
+/* ------------------------------------------------------------------ */
 /*  App initialisieren (Karte + Tabelle + Filter)                      */
 /* ------------------------------------------------------------------ */
 function initApp(data, container, uid, state) {
@@ -883,7 +1037,10 @@ function initApp(data, container, uid, state) {
   const markerLayer = L.layerGroup().addTo(map);
   const mapStatus = container.querySelector(`#sp-map-status-${uid}`);
 
-  const geocodeCache = new Map();
+  // Ermittelte Adresskoordinaten überdauern das Neuladen, damit Nominatim
+  // dieselbe Adresse nicht erneut beantworten muss.
+  const GEOCODE_SPEICHER_KEY = "odas-spielplatz-geocode-v1";
+  const geocodeCache = new Map(Object.entries(leseGeocodeSpeicher()));
   const geocodeInFlight = new Set();
   const markerByKey = new Map();
   let latestRowsByKey = new Map();
@@ -891,6 +1048,9 @@ function initApp(data, container, uid, state) {
   let pendingFocusKey = "";
   let renderScheduled = false;
   let currentPage = 1;
+  // Kartenausschnitt nur nach Filter-/Seitenwechsel anpassen, nicht bei jeder
+  // eintreffenden Geokodierung (sonst springt die Karte).
+  let kartenausschnittAnpassen = true;
 
   const pageSizeSelect = container.querySelector(`#sp-page-size-${uid}`);
   const pageInfo = container.querySelector(`#sp-page-info-${uid}`);
@@ -1014,6 +1174,9 @@ function initApp(data, container, uid, state) {
 
   function getCoords(sp) {
     if (hasCoords(sp)) return [sp.lat, sp.lon];
+    if (Object.prototype.hasOwnProperty.call(VORBERECHNETE_KOORDINATEN, sp.name)) {
+      return VORBERECHNETE_KOORDINATEN[sp.name];
+    }
     const key = geocodeKey(sp);
     if (!key) return null;
     if (geocodeCache.has(key)) return geocodeCache.get(key);
@@ -1041,7 +1204,11 @@ function initApp(data, container, uid, state) {
     url.searchParams.set("q", query);
 
     const response = await fetch(url.toString(), { method: "GET" });
-    if (!response.ok) return null;
+    if (!response.ok) {
+      const error = new Error("Nominatim: HTTP " + response.status);
+      error.status = response.status;
+      throw error;
+    }
 
     const payload = await response.json();
     if (!Array.isArray(payload) || payload.length === 0) return null;
@@ -1056,29 +1223,63 @@ function initApp(data, container, uid, state) {
   // Parallel-Bursts. Vorher startete jeder Render bis zu 8 Anfragen gleichzeitig
   // (und jeder Tastendruck einen Render) — das riskierte eine Sperrung.
   // Jetzt wartet eine Warteschlange und arbeitet sequenziell mit Abstand.
+  // Der Abstand gilt zwischen zwei Anfrage-Starts, auch wenn ein Render
+  // zwischendurch neue Aufträge einreiht; nach HTTP 429 pausiert die
+  // Warteschlange 60 s. Fehler werden nicht gecacht, die Adresse wird beim
+  // nächsten Render erneut eingereiht.
   const GEOCODE_ABSTAND_MS = 1100;
+  const GEOCODE_PAUSE_429_MS = 60000;
   const geocodeWarteschlange = [];
   let geocodeLaeuft = false;
+  let naechsterStartMs = 0;
+
+  function leseGeocodeSpeicher() {
+    try {
+      const daten = JSON.parse(localStorage.getItem(GEOCODE_SPEICHER_KEY) || "{}");
+      return daten && typeof daten === "object" ? daten : {};
+    } catch (_e) {
+      return {};
+    }
+  }
+
+  function speichereGeocode(key, coords) {
+    try {
+      const daten = leseGeocodeSpeicher();
+      daten[key] = coords;
+      localStorage.setItem(GEOCODE_SPEICHER_KEY, JSON.stringify(daten));
+    } catch (_e) {}
+  }
 
   function pumpeGeocodeWarteschlange() {
-    if (geocodeLaeuft || state.disposed) return;
+    if (geocodeLaeuft || state.disposed || state.geocodePumpTimer) return;
+    if (geocodeWarteschlange.length === 0) return;
+    const warte = naechsterStartMs - Date.now();
+    if (warte > 0) {
+      state.geocodePumpTimer = setTimeout(function () {
+        state.geocodePumpTimer = null;
+        pumpeGeocodeWarteschlange();
+      }, warte);
+      return;
+    }
     const auftrag = geocodeWarteschlange.shift();
-    if (!auftrag) return;
     geocodeLaeuft = true;
+    naechsterStartMs = Date.now() + GEOCODE_ABSTAND_MS;
     geocodeAddress(auftrag.query)
       .then(function (coords) {
         if (state.geocodeToken !== auftrag.token) return;
         geocodeCache.set(auftrag.key, coords);
+        speichereGeocode(auftrag.key, coords);
       })
-      .catch(function () {
-        if (state.geocodeToken !== auftrag.token) return;
-        geocodeCache.set(auftrag.key, null);
+      .catch(function (error) {
+        if (error && error.status === 429) {
+          naechsterStartMs = Date.now() + GEOCODE_PAUSE_429_MS;
+        }
       })
       .finally(function () {
         geocodeInFlight.delete(auftrag.key);
         geocodeLaeuft = false;
         if (state.geocodeToken !== auftrag.token) return;
-        setTimeout(pumpeGeocodeWarteschlange, GEOCODE_ABSTAND_MS);
+        pumpeGeocodeWarteschlange();
         scheduleRender();
       });
   }
@@ -1159,7 +1360,8 @@ function initApp(data, container, uid, state) {
     if (selectedMarker) {
       selectedMarker.openPopup();
       map.setView(selectedMarker.getLatLng(), 17, { animate: true });
-    } else if (bounds.length > 0) {
+    } else if (bounds.length > 0 && kartenausschnittAnpassen) {
+      kartenausschnittAnpassen = false;
       try {
         map.fitBounds(bounds, { padding: [30, 30], maxZoom: 16 });
       } catch (e) {}
@@ -1208,10 +1410,7 @@ function initApp(data, container, uid, state) {
 
     // Zähler
     container.querySelector(`#sp-count-${uid}`).textContent =
-      filtered.length +
-      " Spielplatz" +
-      (filtered.length !== 1 ? "plätze" : "") +
-      " gefunden";
+      filtered.length + (filtered.length === 1 ? " Spielplatz" : " Spielplätze") + " gefunden";
 
     pageInfo.textContent =
       `Seite ${currentPage}/${totalPages} · ` +
@@ -1258,12 +1457,22 @@ function initApp(data, container, uid, state) {
 
     highlightSelectedRow();
 
+    // Nur Adressen der aktuellen Seite geokodieren; ältere Aufträge verwerfen.
+    const seitenKeys = new Set(paged.map(geocodeKey));
+    for (let i = geocodeWarteschlange.length - 1; i >= 0; i--) {
+      if (!seitenKeys.has(geocodeWarteschlange[i].key)) {
+        geocodeInFlight.delete(geocodeWarteschlange[i].key);
+        geocodeWarteschlange.splice(i, 1);
+      }
+    }
+
     renderMap(paged);
   }
 
   // --- Event-Listener ---
   function resetPageAndRender() {
     currentPage = 1;
+    kartenausschnittAnpassen = true;
     render();
   }
 
@@ -1306,11 +1515,13 @@ function initApp(data, container, uid, state) {
   prevBtn.addEventListener("click", function () {
     if (currentPage > 1) {
       currentPage--;
+      kartenausschnittAnpassen = true;
       render();
     }
   });
   nextBtn.addEventListener("click", function () {
     currentPage++;
+    kartenausschnittAnpassen = true;
     render();
   });
 

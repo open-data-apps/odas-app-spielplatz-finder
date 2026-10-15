@@ -53,6 +53,13 @@ Hinweis: Boolesche Felder werden aktuell mit J als positiv ausgewertet.
 
 ---
 
+## Datenquelle
+
+- Spielplatzdaten (Standard): [Spielplätze Steglitz-Zehlendorf — Berlin.de](https://www.berlin.de/ba-steglitz-zehlendorf/politik-und-verwaltung/aemter/strassen-und-gruenflaechenamt/gruenflaechen/spiel-und-sportplaetze/simple-search-spielplaetze/) (CSV ohne Koordinaten)
+- Koordinaten der Standardquelle: Geoportal Berlin, WFS [Grünanlagen – Spielplätze](https://gdi.berlin.de/services/wfs/gruenanlagen) (Layer `gruenanlagen:spielplaetze`), Flächenschwerpunkte je Spielplatz, Stand 2026-10-15, als Tabelle in `app/app.js` hinterlegt; Lizenz: [Datenlizenz Deutschland – Zero – Version 2.0](https://www.govdata.de/dl-de/zero-2-0). Zuordnung über den Spielplatznamen; „Marshallstraße 3 SP“ fehlt im WFS und wird per Adresse geokodiert.
+
+---
+
 ## Für wen ist diese App?
 
 Diese App hilft Familien, den passenden Spielplatz in Berlin zu finden. Filtern Sie nach Ortsteil, Ausstattung und Barrierefreiheit.
@@ -106,7 +113,7 @@ Konfiguration wird bei lokaler Entwicklung aus [odas-config/config.json](odas-co
 - Datenabruf erfolgt direkt aus dem Browser gegen die konfigurierte `apiurls.spielplaetze`.
 - Die konfigurierte Datenquelle muss CORS freigeben.
 - Leaflet wird dynamisch per Loader aus `app/vendor/` geladen (nicht per `addToHead`).
-- Adressauflösung fehlender Koordinaten über nominatim.openstreetmap.org: Die Suche ist entprellt, Adressabfragen laufen sequenziell mit ca. 1,1 s Abstand (Nutzungsregeln des Dienstes).
+- Adressauflösung fehlender Koordinaten über nominatim.openstreetmap.org (nur Einträge ohne Koordinaten und ohne Treffer in der hinterlegten Tabelle, nur aktuelle Tabellenseite): Die Suche ist entprellt, Adressabfragen laufen sequenziell mit mindestens 1,1 s Abstand zwischen zwei Anfragen, nach HTTP 429 pausiert die Warteschlange 60 s; fehlgeschlagene Abfragen werden nicht gecacht und später wiederholt. Ermittelte Koordinaten werden im `localStorage` (`odas-spielplatz-geocode-v1`) zwischengespeichert (Nutzungsregeln des Dienstes).
 
 ---
 
