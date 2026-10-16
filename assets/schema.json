@@ -2,76 +2,31 @@
   "$schema": "https://frictionlessdata.io/schemas/table-schema.json",
   "name": "odas-app-spielplatz-finder",
   "title": "Spielplatz-Finder",
-  "description": "Teilmenge unterstützter Eingabefelder einer Spielplatzquelle. Aliasse sind jeweils angegeben; dies ist kein Schema des normalisierten internen Objekts. Die App liest CSV; diese Namen sind die erwarteten Spaltenköpfe.",
+  "description": "Spalten der Standardquelle (CSV des Bezirksamts Steglitz-Zehlendorf, Semikolon-getrennt). Für einzelne Eingabefelder akzeptiert die App weitere Aliasse, die bei den Feldern genannt sind; dies ist kein Schema des normalisierten internen Objekts.",
   "fields": [
+    {
+      "name": "id",
+      "title": "ID",
+      "type": "integer",
+      "description": "Kennung des Spielplatzes in der Quelle.",
+      "constraints": {
+        "required": false
+      }
+    },
+    {
+      "name": "spielplatzart",
+      "title": "Art",
+      "type": "string",
+      "description": "Art des Spielplatzes, z. B. Kleinkinderspielplatz. Eingabe-Aliasse: art oder anlagenart.",
+      "constraints": {
+        "required": false
+      }
+    },
     {
       "name": "ortsteil",
       "title": "Ortsteil",
       "type": "string",
       "description": "Ortsteil des Spielplatzes. Eingabe-Alias: bezirk.",
-      "constraints": {
-        "required": false
-      }
-    },
-    {
-      "name": "art",
-      "title": "Art",
-      "type": "string",
-      "description": "Art des Spielplatzes, z. B. Kleinkinderspielplatz. Eingabe-Aliasse: spielplatzart oder anlagenart.",
-      "constraints": {
-        "required": false
-      }
-    },
-    {
-      "name": "tischtennis_anzahl",
-      "title": "Tischtennis-Anzahl",
-      "type": "integer",
-      "description": "Zahl der Tischtennisplatten (leer, wenn keine vorhanden).",
-      "constraints": {
-        "required": false
-      }
-    },
-    {
-      "name": "tischtennis",
-      "title": "Tischtennis",
-      "type": "string",
-      "description": "Tischtennisangebot („Ja“ oder leer).",
-      "constraints": {
-        "required": false
-      }
-    },
-    {
-      "name": "lat",
-      "title": "Breite",
-      "type": "number",
-      "description": "Breitengrad der Eingabe (weitere Eingabe-Aliasse: breitengrad, ykoord, koordy); fehlt eine nutzbare Position, kann die Runtime die Adresse geokodieren.",
-      "constraints": {
-        "required": false
-      }
-    },
-    {
-      "name": "lon",
-      "title": "Länge",
-      "type": "number",
-      "description": "Längengrad der Eingabe (weitere Eingabe-Aliasse: laengengrad, xkoord, koordx); fehlt eine nutzbare Position, kann die Runtime die Adresse geokodieren.",
-      "constraints": {
-        "required": false
-      }
-    },
-    {
-      "name": "latitude",
-      "title": "Breitengrad",
-      "type": "number",
-      "description": "Breitengrad (Alias aus Quellformaten).",
-      "constraints": {
-        "required": false
-      }
-    },
-    {
-      "name": "longitude",
-      "title": "Längengrad",
-      "type": "number",
-      "description": "Längengrad (Alias aus Quellformaten).",
       "constraints": {
         "required": false
       }
@@ -86,10 +41,73 @@
       }
     },
     {
-      "name": "adresse",
-      "title": "Adresse",
+      "name": "zusatzname",
+      "title": "Zusatzname",
       "type": "string",
-      "description": "Adresse der Eingabe; ist zusätzlich strasse vorhanden, wird strasse bevorzugt.",
+      "description": "Ergänzender Name, häufig leer.",
+      "constraints": {
+        "required": false
+      }
+    },
+    {
+      "name": "flaeche",
+      "title": "Fläche",
+      "type": "number",
+      "description": "Flächenangabe der Quelle. Eingabe-Aliasse: groesse oder größe.",
+      "constraints": {
+        "required": false
+      }
+    },
+    {
+      "name": "ballspielen",
+      "title": "Ballspielen",
+      "type": "string",
+      "description": "Angabe zur Ballspielmöglichkeit, leer wenn keine. Eingabe-Alias: bolzen.",
+      "constraints": {
+        "required": false
+      }
+    },
+    {
+      "name": "tischtennis_anzahl",
+      "title": "Tischtennis-Anzahl",
+      "type": "integer",
+      "description": "Zahl der Tischtennisplatten (leer, wenn keine vorhanden).",
+      "constraints": {
+        "required": false
+      }
+    },
+    {
+      "name": "behindertengerecht",
+      "title": "Barrierefrei",
+      "type": "string",
+      "description": "Barrierefreiheitsangabe der Quelle (Symbolkennung oder leer). Eingabe-Alias: barrierefrei.",
+      "constraints": {
+        "required": false
+      }
+    },
+    {
+      "name": "bemerkung",
+      "title": "Bemerkung",
+      "type": "string",
+      "description": "Freitext der Quelle, häufig leer.",
+      "constraints": {
+        "required": false
+      }
+    },
+    {
+      "name": "strasse",
+      "title": "Straße",
+      "type": "string",
+      "description": "Straße; wird gegenüber adresse bevorzugt.",
+      "constraints": {
+        "required": false
+      }
+    },
+    {
+      "name": "plz",
+      "title": "PLZ",
+      "type": "string",
+      "description": "Postleitzahl. Eingabe-Alias: postleitzahl.",
       "constraints": {
         "required": false
       }
