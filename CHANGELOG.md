@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.30.16 - 2026-10-27
+- FIX: Bei null Treffern meldet die Karte „Keine Spielplätze für diese Auswahl.“ statt „Für diese Auswahl konnten keine Koordinaten ermittelt werden.“ (Live-Befund 27.10.2026).
+- DOCS: Store-Katalogtext ohne Instanz-Platzhalter: Links mit Platzhalterziel erscheinen dort als Text, weil die Katalogseite keine Instanz kennt und Platzhalter nicht auflöst (Live-Befund 27.10.2026). „Über diese App“ in der App bleibt unverändert.
+
 ## 1.30.15 - 2026-10-16
 - FIX: Schema beschreibt jetzt genau die Spalten der Standardquelle (Alias-Namen stehen bei den Feldern), damit die Store-Datenprüfung die Quelle prüfen kann.
 

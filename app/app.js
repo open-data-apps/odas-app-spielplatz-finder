@@ -710,6 +710,18 @@ function waitForLeafletThenInit(data, container, uid, state) {
   );
 }
 
+// Live-Befund 27.10.2026: Bei null Treffern meldete die Karte fehlende Koordinaten.
+function spKartenStatusText(zeilen, marker, wartend) {
+  if (zeilen === 0) return "Keine Spielplätze für diese Auswahl.";
+  if (marker > 0) {
+    return `${marker} Marker auf Karte` +
+      (wartend > 0 ? ` · ${wartend} Adresse(n) werden ermittelt …` : "");
+  }
+  return wartend > 0
+    ? `Noch keine Koordinaten vorhanden · ${wartend} Adresse(n) werden ermittelt …`
+    : "Für diese Auswahl konnten keine Koordinaten ermittelt werden.";
+}
+
 /* ------------------------------------------------------------------ */
 /*  CSV-Parser (quote-sicher, Semikolon/Komma)                         */
 /* ------------------------------------------------------------------ */
@@ -1410,19 +1422,7 @@ function initApp(data, container, uid, state) {
       } catch (e) {}
     }
 
-    if (markerCount > 0) {
-      mapStatus.textContent =
-        `${markerCount} Marker auf Karte` +
-        (queuedGeocodes > 0
-          ? ` · ${queuedGeocodes} Adresse(n) werden ermittelt …`
-          : "");
-      return;
-    }
-
-    mapStatus.textContent =
-      queuedGeocodes > 0
-        ? `Noch keine Koordinaten vorhanden · ${queuedGeocodes} Adresse(n) werden ermittelt …`
-        : "Für diese Auswahl konnten keine Koordinaten ermittelt werden.";
+    mapStatus.textContent = spKartenStatusText(rows.length, markerCount, queuedGeocodes);
   }
 
   // Render-Funktion
