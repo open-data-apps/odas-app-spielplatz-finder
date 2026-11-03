@@ -2,6 +2,7 @@
 
 ## 1.30.17 - 2026-11-03
 - DOCS: MIT-Lizenz ergänzt: `LICENSE` liegt im Repository und im Lieferpaket (`make zip`), das README hat einen Abschnitt „Lizenz“. Keine Änderung an App-Code oder Konfiguration.
+- DOCS: Alte Store-Screenshots unter `docs/screenshots/archive/2026-10-13/` entfernt; sie bleiben über den Git-Tag `archive/screenshots-2026-10-13` abrufbar.
 
 ## 1.30.16 - 2026-10-27
 - FIX: Bei null Treffern meldet die Karte „Keine Spielplätze für diese Auswahl.“ statt „Für diese Auswahl konnten keine Koordinaten ermittelt werden.“ (Live-Befund 27.10.2026).
